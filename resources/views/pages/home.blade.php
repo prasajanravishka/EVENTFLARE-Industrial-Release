@@ -9,22 +9,29 @@
         margin: 0 auto;
         padding: 0 24px;
     }
+    .home-container {
+        max-width: 1240px;
+        margin: 0 auto;
+        padding: 0 24px;
+    }
     .hero-section {
         display: grid;
         grid-template-columns: 1.15fr 0.85fr;
         gap: 50px;
         align-items: center;
-        padding: 50px 0 80px;
+        padding: 40px 0 60px;
+        position: relative;
     }
     .hero-title {
-        font-size: 46px;
+        font-size: 52px;
         font-weight: 900;
-        line-height: 1.2;
+        line-height: 1.15;
         margin-bottom: 20px;
         color: var(--text-heading);
+        letter-spacing: -0.02em;
     }
     .hero-title span {
-        background: linear-gradient(135deg, var(--primary) 0%, #ec4899 100%);
+        background: linear-gradient(135deg, var(--primary) 0%, #ec4899 50%, #f59e0b 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
     }
@@ -32,55 +39,274 @@
         font-size: 17px;
         color: var(--text-muted);
         line-height: 1.7;
-        margin-bottom: 30px;
-    }
-    .hero-actions {
-        display: flex;
-        gap: 16px;
-        flex-wrap: wrap;
+        margin-bottom: 28px;
+        max-width: 600px;
     }
     .hero-badge-pill {
         display: inline-flex;
         align-items: center;
-        gap: 8px;
-        background: rgba(139, 92, 246, 0.1);
+        gap: 10px;
+        background: rgba(139, 92, 246, 0.09);
         color: var(--primary);
-        padding: 6px 16px;
-        border-radius: 30px;
+        padding: 8px 18px;
+        border-radius: 40px;
         font-size: 13px;
         font-weight: 700;
-        margin-bottom: 20px;
+        margin-bottom: 22px;
+        border: 1px solid rgba(139, 92, 246, 0.25);
+        box-shadow: 0 4px 15px rgba(139, 92, 246, 0.08);
+    }
+    .hero-pulse-dot {
+        width: 8px;
+        height: 8px;
+        background: #10b981;
+        border-radius: 50%;
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+        animation: pulseGreen 2s infinite;
+    }
+    @keyframes pulseGreen {
+        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+        70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+    /* Hero Instant Discovery Search Widget */
+    .hero-search-box {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(24px);
         border: 1px solid rgba(139, 92, 246, 0.2);
+        border-radius: 20px;
+        padding: 20px 24px;
+        box-shadow: 0 16px 40px -10px rgba(139, 92, 246, 0.16);
+        margin-bottom: 28px;
     }
-    .hero-card {
-        background: rgba(255, 255, 255, 0.85);
-        backdrop-filter: blur(20px);
-        border: 1px solid var(--card-border);
-        border-radius: 24px;
-        padding: 30px;
-        box-shadow: var(--shadow-premium);
+    .hero-search-grid {
+        display: grid;
+        grid-template-columns: 1.2fr 1fr 1fr auto;
+        gap: 12px;
+        align-items: center;
     }
+    .hero-field-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+    .hero-field-label {
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-muted);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .hero-field-select, .hero-field-input {
+        width: 100%;
+        padding: 10px 14px;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text-heading);
+        background: #f8fafc;
+        outline: none;
+        transition: all 0.2s ease;
+    }
+    .hero-field-select:focus, .hero-field-input:focus {
+        border-color: var(--primary);
+        background: #fff;
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+    }
+    .hero-search-btn {
+        height: 48px;
+        padding: 0 24px;
+        background: linear-gradient(135deg, var(--primary) 0%, #7c3aed 100%);
+        color: #fff;
+        border: none;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        cursor: pointer;
+        transition: all 0.25s ease;
+        box-shadow: 0 8px 20px rgba(139, 92, 246, 0.3);
+        margin-top: 18px;
+        white-space: nowrap;
+    }
+    .hero-search-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 26px rgba(139, 92, 246, 0.4);
+    }
+    .hero-quick-tags {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+        font-size: 13px;
+        color: var(--text-muted);
+    }
+    .hero-quick-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 4px 12px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid #e2e8f0;
+        color: var(--text-main);
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    .hero-quick-pill:hover {
+        background: var(--primary);
+        color: #fff;
+        border-color: var(--primary);
+    }
+    /* Visual Showcase Right Column */
+    .hero-showcase-wrap {
+        position: relative;
+    }
+    .hero-main-card {
+        position: relative;
+        border-radius: 28px;
+        overflow: hidden;
+        box-shadow: 0 25px 60px -15px rgba(26, 18, 56, 0.22);
+        background: #1e1b4b;
+        aspect-ratio: 4/4.6;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .hero-main-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0.88;
+        transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    .hero-main-card:hover .hero-main-img {
+        transform: scale(1.04);
+    }
+    .hero-card-gradient {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, rgba(15, 23, 42, 0.1) 0%, rgba(15, 23, 42, 0.8) 100%);
+    }
+    .hero-card-bottom {
+        position: absolute;
+        bottom: 24px;
+        left: 24px;
+        right: 24px;
+        color: #fff;
+    }
+    .hero-card-tag {
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        background: rgba(236, 72, 153, 0.9);
+        color: #fff;
+        padding: 4px 10px;
+        border-radius: 6px;
+        margin-bottom: 8px;
+        letter-spacing: 0.05em;
+    }
+    /* Floating Badges */
+    .float-badge-top {
+        position: absolute;
+        top: -18px;
+        right: -16px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(139, 92, 246, 0.25);
+        padding: 12px 18px;
+        border-radius: 18px;
+        box-shadow: 0 16px 32px rgba(0, 0, 0, 0.12);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        animation: floatBadge 4.5s ease-in-out infinite alternate;
+        z-index: 10;
+    }
+    .float-badge-bottom {
+        position: absolute;
+        bottom: -22px;
+        left: -20px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(16, 185, 129, 0.25);
+        padding: 12px 18px;
+        border-radius: 18px;
+        box-shadow: 0 16px 32px rgba(0, 0, 0, 0.12);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        animation: floatBadgeReverse 4s ease-in-out infinite alternate;
+        z-index: 10;
+    }
+    @keyframes floatBadge {
+        0% { transform: translateY(0px); }
+        100% { transform: translateY(-10px); }
+    }
+    @keyframes floatBadgeReverse {
+        0% { transform: translateY(0px); }
+        100% { transform: translateY(8px); }
+    }
+    .avatar-stack {
+        display: flex;
+        align-items: center;
+    }
+    .avatar-stack-item {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: 2px solid #fff;
+        margin-left: -8px;
+        object-fit: cover;
+    }
+    .avatar-stack-item:first-child {
+        margin-left: 0;
+    }
+    /* Upgraded Stats Bar */
     .stats-bar {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 20px;
-        padding: 30px;
-        background: rgba(255, 255, 255, 0.9);
-        border: 1px solid var(--card-border);
-        border-radius: 20px;
+        gap: 24px;
+        padding: 28px 36px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(139, 92, 246, 0.16);
+        border-radius: 24px;
         margin-bottom: 70px;
-        text-align: center;
-        box-shadow: var(--shadow-premium);
+        box-shadow: 0 20px 40px -15px rgba(139, 92, 246, 0.12);
+    }
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+    .stat-icon-wrap {
+        width: 52px;
+        height: 52px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        flex-shrink: 0;
     }
     .stat-number {
-        font-size: 32px;
+        font-size: 28px;
         font-weight: 800;
-        color: var(--primary);
+        color: var(--text-heading);
+        line-height: 1.1;
     }
     .stat-label {
         font-size: 13px;
         color: var(--text-muted);
         font-weight: 600;
+        margin-top: 2px;
     }
     .category-grid {
         display: grid;
@@ -185,10 +411,22 @@
         grid-template-columns: 1fr 1.2fr;
         gap: 50px;
     }
-    @media(max-width: 900px) {
-        .hero-section { grid-template-columns: 1fr; }
-        .stats-bar { grid-template-columns: 1fr 1fr; }
+    @media(max-width: 992px) {
+        .hero-section { grid-template-columns: 1fr; gap: 40px; padding: 30px 0 50px; }
+        .hero-title { font-size: 40px; }
+        .hero-search-grid { grid-template-columns: 1fr 1fr; }
+        .hero-search-btn { margin-top: 0; grid-column: span 2; justify-content: center; width: 100%; }
+        .stats-bar { grid-template-columns: 1fr 1fr; gap: 20px; padding: 24px; }
         .contact-grid { grid-template-columns: 1fr; }
+        .float-badge-top { top: 10px; right: 10px; }
+        .float-badge-bottom { bottom: 10px; left: 10px; }
+    }
+    @media(max-width: 600px) {
+        .hero-title { font-size: 32px; }
+        .hero-subtitle { font-size: 15px; }
+        .hero-search-grid { grid-template-columns: 1fr; }
+        .hero-search-btn { grid-column: span 1; }
+        .stats-bar { grid-template-columns: 1fr; gap: 16px; padding: 20px; }
     }
 </style>
 @endpush
@@ -199,44 +437,122 @@
     <section class="hero-section" id="hero">
         <div>
             <div class="hero-badge-pill">
-                <i class="fas fa-crown"></i> Sri Lanka's Premier Event Marketplace
+                <span class="hero-pulse-dot"></span>
+                <span>Sri Lanka's #1 Event Marketplace</span>
+                <span style="opacity: 0.5;">•</span>
+                <span style="font-weight: 500;">1,200+ Celebrations Curated</span>
             </div>
+
             <h1 class="hero-title">
                 Elevating Celebrations <span>Beyond Expectation.</span>
             </h1>
+
             <p class="hero-subtitle">
-                Connect with handpicked, vetted wedding florists, traditional Poruwa masters, concert audio engineers, and five-star beachside hotels — all backed by transparent upfront pricing and intelligent budgeting.
+                Discover and book Sri Lanka's finest wedding florists, traditional Poruwa masters, concert DJ engineers, and luxury beachfront hotels — with upfront transparent LKR pricing and dedicated coordination.
             </p>
-            <div class="hero-actions">
-                <a href="{{ route('events.index') }}" class="btn btn-primary" style="padding: 14px 28px; font-size: 15px;">
-                    <i class="fas fa-compass"></i> Explore Event Categories
+
+            <!-- Instant Discovery Search Bar Widget -->
+            <div class="hero-search-box">
+                <form action="{{ route('marketplace.index') }}" method="GET">
+                    <div class="hero-search-grid">
+                        <div class="hero-field-group">
+                            <label class="hero-field-label" for="hero_event_type">
+                                <i class="fas fa-sparkles" style="color: var(--primary);"></i> Occasion
+                            </label>
+                            <select id="hero_event_type" name="event_type" class="hero-field-select">
+                                <option value="">All Occasions & Vibes</option>
+                                @foreach($eventTypes as $et)
+                                    <option value="{{ $et->event_type_id }}">{{ $et->type_name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="hero-field-group">
+                            <label class="hero-field-label" for="hero_location">
+                                <i class="fas fa-map-marker-alt" style="color: #ec4899;"></i> Location
+                            </label>
+                            <select id="hero_location" name="location" class="hero-field-select">
+                                <option value="">All Regions</option>
+                                @foreach($popularLocations as $loc)
+                                    <option value="{{ $loc }}">{{ $loc }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="hero-field-group">
+                            <label class="hero-field-label" for="hero_date">
+                                <i class="fas fa-calendar-alt" style="color: #f59e0b;"></i> Event Date
+                            </label>
+                            <input type="date" id="hero_date" name="date" class="hero-field-input" min="{{ date('Y-m-d') }}">
+                        </div>
+
+                        <div>
+                            <button type="submit" class="hero-search-btn">
+                                <i class="fas fa-search"></i>
+                                <span>Find Vendors</span>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Quick Category Badges & Direct Links -->
+            <div class="hero-quick-tags">
+                <span style="font-weight: 700; color: var(--text-heading); font-size: 12px; text-transform: uppercase;">Trending:</span>
+                <a href="{{ route('events.weddings') }}" class="hero-quick-pill">
+                    <i class="fas fa-ring" style="color: #ec4899; font-size: 11px;"></i> Poruwa & Weddings
                 </a>
-                <a href="{{ route('food-calculator') }}" class="btn btn-secondary" style="padding: 14px 28px; font-size: 15px;">
-                    <i class="fas fa-calculator"></i> Food Budget Tool
+                <a href="{{ route('events.dj-parties') }}" class="hero-quick-pill">
+                    <i class="fas fa-headphones" style="color: #8b5cf6; font-size: 11px;"></i> DJ & Lighting
+                </a>
+                <a href="{{ route('food-calculator') }}" class="hero-quick-pill">
+                    <i class="fas fa-calculator" style="color: #10b981; font-size: 11px;"></i> Food Budget Tool
                 </a>
             </div>
         </div>
 
-        <div>
-            <div class="hero-card">
-                <div style="text-align: center; margin-bottom: 20px;">
-                    <img src="{{ asset('assets/images/logo.jpg') }}" alt="Eventflare Logo" style="width: 80px; height: 80px; border-radius: 20px; object-fit: cover; box-shadow: 0 8px 20px rgba(139, 92, 246, 0.25);" onerror="this.src='https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=100'">
-                    <h3 style="margin-top: 14px; font-size: 20px;">Ready to Plan?</h3>
-                    <p style="color: var(--text-muted); font-size: 14px;">Instant booking with certified vendor assignments</p>
+        <!-- Visual Collage Column with Floating Badges -->
+        <div class="hero-showcase-wrap">
+            <!-- Top Right Floating Social Proof Badge -->
+            <div class="float-badge-top">
+                <div class="avatar-stack">
+                    <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&h=80&fit=crop" class="avatar-stack-item" alt="Client">
+                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop" class="avatar-stack-item" alt="Client">
+                    <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop" class="avatar-stack-item" alt="Client">
                 </div>
-                <div style="display: flex; flex-direction: column; gap: 12px;">
-                    <a href="{{ route('events.weddings') }}" class="btn btn-outline" style="border: 1px solid #e2e8f0; justify-content: flex-start; padding: 12px 18px; color: var(--text-heading);">
-                        <i class="fas fa-ring" style="color: #ec4899;"></i> Royal Weddings Showcase
-                    </a>
-                    <a href="{{ route('events.dj-parties') }}" class="btn btn-outline" style="border: 1px solid #e2e8f0; justify-content: flex-start; padding: 12px 18px; color: var(--text-heading);">
-                        <i class="fas fa-music" style="color: #8b5cf6;"></i> DJ Parties & Concert Audio
-                    </a>
-                    <a href="{{ route('events.birthdays') }}" class="btn btn-outline" style="border: 1px solid #e2e8f0; justify-content: flex-start; padding: 12px 18px; color: var(--text-heading);">
-                        <i class="fas fa-birthday-cake" style="color: #f59e0b;"></i> Milestone Birthdays
-                    </a>
-                    <a href="{{ route('events.hotels') }}" class="btn btn-outline" style="border: 1px solid #e2e8f0; justify-content: flex-start; padding: 12px 18px; color: var(--text-heading);">
-                        <i class="fas fa-hotel" style="color: #3b82f6;"></i> 5-Star Hotel Venues
-                    </a>
+                <div>
+                    <div style="font-size: 13px; font-weight: 800; color: var(--text-heading); display: flex; align-items: center; gap: 4px;">
+                        <i class="fas fa-star" style="color: #f59e0b; font-size: 12px;"></i> 4.9 / 5.0
+                    </div>
+                    <div style="font-size: 11px; color: var(--text-muted); font-weight: 600;">1,200+ Verified Reviews</div>
+                </div>
+            </div>
+
+            <!-- Main High-Res Visual Showcase Card -->
+            <div class="hero-main-card">
+                <img src="https://images.unsplash.com/photo-1519741497674-611481863552?w=900&q=80&auto=format&fit=crop" alt="Sri Lankan Luxury Wedding Banquet" class="hero-main-img">
+                <div class="hero-card-gradient"></div>
+                <div class="hero-card-bottom">
+                    <span class="hero-card-tag"><i class="fas fa-crown"></i> Featured Celebration</span>
+                    <h3 style="font-size: 20px; font-weight: 800; line-height: 1.3; margin-bottom: 6px; color: #fff;">
+                        Oceanfront Sunset Gala & Grand Poruwa
+                    </h3>
+                    <div style="display: flex; align-items: center; gap: 14px; font-size: 13px; opacity: 0.9;">
+                        <span><i class="fas fa-map-pin" style="color: #f43f5e;"></i> Galle Fort, Sri Lanka</span>
+                        <span>•</span>
+                        <span><i class="fas fa-shield-check" style="color: #34d399;"></i> 100% Curated</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Left Floating Trust Badge -->
+            <div class="float-badge-bottom">
+                <div style="width: 38px; height: 38px; border-radius: 12px; background: rgba(16, 185, 129, 0.12); color: #10b981; display: flex; align-items: center; justify-content: center; font-size: 18px;">
+                    <i class="fas fa-shield-check"></i>
+                </div>
+                <div>
+                    <div style="font-size: 13px; font-weight: 800; color: var(--text-heading);">Verified Sri Lankan Vendors</div>
+                    <div style="font-size: 11px; color: #059669; font-weight: 700;">Guaranteed Upfront LKR Pricing</div>
                 </div>
             </div>
         </div>
@@ -244,21 +560,44 @@
 
     <!-- 2. PLATFORM METRICS -->
     <div class="stats-bar">
-        <div>
-            <div class="stat-number">10+</div>
-            <div class="stat-label">Vetted Service Categories</div>
+        <div class="stat-item">
+            <div class="stat-icon-wrap" style="background: rgba(139, 92, 246, 0.12); color: var(--primary);">
+                <i class="fas fa-calendar-check"></i>
+            </div>
+            <div>
+                <div class="stat-number">1,200+</div>
+                <div class="stat-label">Celebrations Executed</div>
+            </div>
         </div>
-        <div>
-            <div class="stat-number">27+</div>
-            <div class="stat-label">Verified Packages</div>
+
+        <div class="stat-item">
+            <div class="stat-icon-wrap" style="background: rgba(236, 72, 153, 0.12); color: #ec4899;">
+                <i class="fas fa-user-check"></i>
+            </div>
+            <div>
+                <div class="stat-number">{{ $supplierCount > 0 ? $supplierCount : '450' }}+</div>
+                <div class="stat-label">Certified Suppliers</div>
+            </div>
         </div>
-        <div>
-            <div class="stat-number">100%</div>
-            <div class="stat-label">Transparent Pricing</div>
+
+        <div class="stat-item">
+            <div class="stat-icon-wrap" style="background: rgba(16, 185, 129, 0.12); color: #10b981;">
+                <i class="fas fa-tags"></i>
+            </div>
+            <div>
+                <div class="stat-number">100%</div>
+                <div class="stat-label">Transparent LKR Pricing</div>
+            </div>
         </div>
-        <div>
-            <div class="stat-number">5.0 ★</div>
-            <div class="stat-label">Average Satisfaction</div>
+
+        <div class="stat-item">
+            <div class="stat-icon-wrap" style="background: rgba(245, 158, 11, 0.12); color: #f59e0b;">
+                <i class="fas fa-crown"></i>
+            </div>
+            <div>
+                <div class="stat-number">4.9 ★</div>
+                <div class="stat-label">Average Client Rating</div>
+            </div>
         </div>
     </div>
 

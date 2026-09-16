@@ -21,8 +21,9 @@ class PageController extends Controller
 
         $eventTypes = EventType::active()->withCount('services')->get();
         $supplierCount = Supplier::count();
+        $popularLocations = ['Colombo', 'Kandy', 'Galle', 'Negombo', 'Bentota', 'Nuwara Eliya', 'Gampaha', 'Kalutara'];
 
-        return view('pages.home', compact('reviews', 'eventTypes', 'supplierCount'));
+        return view('pages.home', compact('reviews', 'eventTypes', 'supplierCount', 'popularLocations'));
     }
 
     public function about()
