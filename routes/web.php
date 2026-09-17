@@ -95,6 +95,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     // Bookings Operations
     Route::get('/bookings', [AdminBookingController::class, 'index'])->name('bookings.index');
+    Route::get('/bookings/{id}', [AdminBookingController::class, 'show'])->name('bookings.show');
     Route::patch('/bookings/{id}/status', [AdminBookingController::class, 'updateStatus'])->name('bookings.status');
     Route::post('/bookings/{id}/assign', [AdminBookingController::class, 'assignSupplier'])->name('bookings.assign');
     Route::delete('/bookings/assignments/{id}', [AdminBookingController::class, 'removeAssignment'])->name('bookings.assignments.destroy');
@@ -106,6 +107,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/suppliers', [AdminUserController::class, 'suppliers'])->name('suppliers.index');
     Route::post('/suppliers', [AdminUserController::class, 'storeSupplier'])->name('suppliers.store');
     Route::put('/suppliers/{id}', [AdminUserController::class, 'updateSupplier'])->name('suppliers.update');
+    Route::delete('/suppliers/{id}', [AdminUserController::class, 'destroySupplier'])->name('suppliers.destroy');
 
     // Ratings & Reviews Moderation
     Route::get('/ratings', [AdminOperationsController::class, 'ratings'])->name('ratings.index');

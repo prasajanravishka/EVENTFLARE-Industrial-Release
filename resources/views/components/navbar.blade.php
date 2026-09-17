@@ -20,11 +20,11 @@
                     Home
                 </a>
             </li>
-            <li>
+         <!--            <li>
                 <a href="{{ route('events.index') }}" class="nav-link {{ request()->routeIs('events.*') ? 'active' : '' }}">
                     <i class="fas fa-layer-group"></i> Events
                 </a>
-            </li>
+            </li> -->
             <li>
                 <a href="{{ route('marketplace.index') }}" class="nav-link {{ request()->routeIs('marketplace.*') ? 'active' : '' }}">
                     <i class="fas fa-store"></i> Marketplace
@@ -35,16 +35,18 @@
                     Services
                 </a>
             </li>
-            <li>
-                <a href="{{ route('about') }}" class="nav-link {{ request()->routeIs('about') ? 'active' : '' }}">
-                    About
-                </a>
-            </li>
+
             <li>
                 <a href="{{ url('/#reviews') }}" class="nav-link">
                     Reviews
                 </a>
             </li>
+            <li>
+                <a href="{{ url('/#about') }}" class="nav-link">
+                    About
+                </a>
+            </li>
+
             <li>
                 <a href="{{ url('/#contact') }}" class="nav-link">
                     Contact

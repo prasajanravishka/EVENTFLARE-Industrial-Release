@@ -80,7 +80,11 @@
                 <tbody>
                     @forelse($recentBookings as $rb)
                         <tr style="border-bottom: 1px solid #f1f5f9;">
-                            <td style="padding: 10px; font-weight: 800; font-family: monospace; color: var(--primary);">#{{ $rb->BookingID }}</td>
+                            <td style="padding: 10px; font-weight: 800; font-family: monospace;">
+                                <a href="{{ route('admin.bookings.show', $rb->BookingID) }}" style="text-decoration: none; color: var(--primary); display: inline-flex; align-items: center; gap: 4px;" title="View Booking Lifecycle">
+                                    <i class="fas fa-receipt fa-xs"></i>#{{ $rb->BookingID }}
+                                </a>
+                            </td>
                             <td style="padding: 10px; font-weight: 600;">{{ $rb->user_name }}</td>
                             <td style="padding: 10px;">{{ $rb->EventType }}</td>
                             <td style="padding: 10px; color: #64748b;">{{ \Carbon\Carbon::parse($rb->EventDate)->format('M d, Y') }}</td>

@@ -67,7 +67,9 @@
             @forelse($bookings as $b)
                 <tr style="border-bottom: 1px solid #f1f5f9;">
                     <td style="padding: 14px;">
-                        <strong style="color: var(--primary); font-family: monospace;">#{{ $b->BookingID }}</strong>
+                        <a href="{{ route('admin.bookings.show', $b->BookingID) }}" style="text-decoration: none; color: var(--primary); font-family: monospace; font-weight: 800;" title="View Booking Lifecycle Dossier">
+                            <i class="fas fa-receipt fa-xs" style="margin-right: 4px;"></i>#{{ $b->BookingID }}
+                        </a>
                     </td>
                     <td style="padding: 14px;">
                         <div style="font-weight: 700; color: var(--text-heading);">{{ $b->user->fullname ?? $b->user_name }}</div>
@@ -101,6 +103,9 @@
                         </form>
                     </td>
                     <td style="padding: 14px; text-align: right; white-space: nowrap;">
+                        <a href="{{ route('admin.bookings.show', $b->BookingID) }}" class="btn btn-outline" style="border: 1px solid #c7d2fe; color: #4338ca; padding: 4px 10px; font-size: 11px; border-radius: 12px; margin-right: 4px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                            <i class="fas fa-eye"></i> Details
+                        </a>
                         <form method="POST" action="{{ route('admin.bookings.destroy', $b->BookingID) }}" style="display: inline;" onsubmit="return confirm('Permanently delete booking #{{ $b->BookingID }}?');">
                             @csrf
                             @method('DELETE')

@@ -9,6 +9,7 @@ use App\Models\EventExtra;
 use App\Models\EventType;
 use App\Models\Rating;
 use App\Models\Service;
+use App\Services\EventWizardData;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -39,70 +40,22 @@ class BookingController extends Controller
             $preDetails = !empty($preDetails) ? $preDetails . ' | ' . $styleLabel : $styleLabel;
         }
 
-        // If specific category is requested, load itemized services and suppliers
-        $selectedType = null;
+        // Get unified dynamic wizard configuration
+        $wizardConfig = EventWizardData::getWizardConfig($preEvent ?: 'Weddings');
+        $categoryName = $wizardConfig['category_name'];
+
+        // Load itemized services and suppliers for this event category
+        $selectedType = EventType::where('type_name', 'like', "%{$categoryName}%")->first();
         $services = collect();
-        if (!empty($preEvent)) {
-            $selectedType = EventType::where('type_name', 'like', "%{$preEvent}%")->first();
-            if ($selectedType) {
-                $services = Service::with(['listings.supplier', 'suppliers'])
-                    ->where('event_type_id', $selectedType->event_type_id)
-                    ->orderBy('priority_rank')
-                    ->get();
-            }
+        if ($selectedType) {
+            $services = Service::with(['listings.supplier', 'suppliers'])
+                ->where('event_type_id', $selectedType->event_type_id)
+                ->orderBy('priority_rank')
+                ->get();
         }
 
-        // Dedicated Wedding Tiers & Cultural Styles configuration
-        $cateringTiers = [
-            'Platinum' => [
-                'name' => 'Platinum Grand Tier',
-                'rate' => 6500.00,
-                'tagline' => '5-Course International Gourmet Buffet & Live Themed Carving Stations',
-                'highlights' => ['Unlimited Welcome Mocktails & Fresh Fruit Carafes', '3 Live Show-Cooking Stalls (Mongolian & Roast Ribs)', '12 Artisanal Desserts & Belgian Chocolate Fountain', 'Dedicated Head Waiter & White Glove Table Service'],
-                'badge' => 'Most Popular',
-            ],
-            'Executive' => [
-                'name' => 'Executive Royal Tier',
-                'rate' => 4800.00,
-                'tagline' => '3-Course Delicacy Buffet with Curated Ceylon & Continental Specialities',
-                'highlights' => ['Welcome Fruit Punch & Chilled Canapés', '2 Live Action Stations (Satay & Pasta Corner)', '8 Handcrafted Tropical & French Pastries', 'Trained Uniformed Banquet Captains'],
-                'badge' => 'Best Value',
-            ],
-            'Cocktail' => [
-                'name' => 'Twilight Cocktail Tier',
-                'rate' => 3200.00,
-                'tagline' => 'Gourmet Pass-Around Canapés, Artisan Sliders & Grazing Boards',
-                'highlights' => ['14 Signature Pass-Around Finger Food Selections', 'Artisanal European Cheese & Charcuterie Board', 'Live Dim Sum & Yakitori Brochette Stations', 'Specialized Mixologist Mocktail Station'],
-                'badge' => 'Chic & Light',
-            ],
-        ];
-
-        $culturalStyles = [
-            'Traditional' => [
-                'title' => 'Traditional Poruwa',
-                'icon' => 'fas fa-landmark',
-                'color' => '#f59e0b',
-                'desc' => 'Sacred Sinhala cultural rituals, Magul Bera drummers, Jayamangala chants & lotus mandaps.',
-            ],
-            'Western' => [
-                'title' => 'Western Elegance',
-                'icon' => 'fas fa-church',
-                'color' => '#60a5fa',
-                'desc' => 'Contemporary cathedral aisle styling, formal black-tie banquet, champagne toasts & first dance.',
-            ],
-            'Beach' => [
-                'title' => 'Coastal Beachside',
-                'icon' => 'fas fa-umbrella-beach',
-                'color' => '#34d399',
-                'desc' => 'Tropical sunset vows, floral timber canopies, ocean breezes & barefoot luxury ambiance.',
-            ],
-            'Ballroom' => [
-                'title' => 'Grand Luxury Ballroom',
-                'icon' => 'fas fa-gem',
-                'color' => '#f472b6',
-                'desc' => '5-Star hotel grandeur, crystal chandeliers, floral tunnels, and theatrical ambient wash.',
-            ],
-        ];
+        $cateringTiers = $wizardConfig['catering_tiers'];
+        $culturalStyles = $wizardConfig['styles'];
 
         return view('client.bookings.create', compact(
             'eventTypes',
@@ -115,7 +68,8 @@ class BookingController extends Controller
             'selectedType',
             'services',
             'cateringTiers',
-            'culturalStyles'
+            'culturalStyles',
+            'wizardConfig'
         ));
     }
 
@@ -168,9 +122,10 @@ class BookingController extends Controller
             $extraDetails = !empty($extraDetails) ? $prefix . " | " . $extraDetails : $prefix;
         }
 
-        // Generate collision-resistant unique Booking ID (BKG-WED-XXXX or BKG-XXXX)
-        $isWedding = stripos($validated['EventType'], 'Wed') !== false;
-        $bookingId = ($isWedding ? 'BKG-WED-' : 'BKG-') . strtoupper(Str::random(8));
+        // Generate collision-resistant unique Booking ID (e.g. BKG-WED-XXXX, BKG-DJ-XXXX, BKG-BDAY-XXXX, etc.)
+        $wizardConfig = EventWizardData::getWizardConfig($validated['EventType']);
+        $prefix = $wizardConfig['booking_prefix'] ?? 'BKG-';
+        $bookingId = $prefix . strtoupper(Str::random(8));
 
         DB::beginTransaction();
         try {
@@ -191,15 +146,23 @@ class BookingController extends Controller
             // Persist optional event extras
             $foodStyle = $validated['food_style'] ?? '';
             if (!empty($validated['cultural_style'])) {
-                $foodStyle = $validated['cultural_style'] . ' Wedding';
+                $foodStyle = $validated['cultural_style'] . ' Style';
             }
             if (empty($foodStyle)) {
                 $foodStyle = $foodPref;
             }
 
+            $defaultEquipment = match(true) {
+                stripos($validated['EventType'], 'DJ') !== false => 'Concert Audio/Visual Rig, Laser Truss & Stage Lighting',
+                stripos($validated['EventType'], 'Birth') !== false => 'Themed Organic Balloon Garland, Plinths & Party Audio',
+                stripos($validated['EventType'], 'Hotel') !== false => 'Ballroom Audio/Visual Podium, Intelligent Mood Wash & Dual Screens',
+                stripos($validated['EventType'], 'Together') !== false => 'Outdoor Marquee Canopy, Live BBQ Grill Station & Acoustic Sound',
+                default => 'Traditional Poruwa Decor, Stage AV & Mood Lighting',
+            };
+
             EventExtra::create([
                 'booking_id' => $bookingId,
-                'equipment' => $validated['equipment'] ?? 'Traditional Poruwa Decor, Stage AV & Mood Lighting',
+                'equipment' => $validated['equipment'] ?? $defaultEquipment,
                 'food_style' => $foodStyle,
             ]);
 

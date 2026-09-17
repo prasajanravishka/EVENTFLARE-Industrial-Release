@@ -52,12 +52,34 @@ class AdminBookingController extends Controller
     }
 
     /**
+     * Display comprehensive booking dossier with lifecycle progression across all stages.
+     */
+    public function show(string $id)
+    {
+        $booking = Booking::with([
+            'user',
+            'services.service.eventType',
+            'services.supplier.user',
+            'services.listing',
+            'extra',
+            'ratings.user',
+        ])->where('BookingID', $id)->firstOrFail();
+
+        // Retrieve event type catalog services and available accredited suppliers for assignments
+        $eventType = EventType::where('type_name', $booking->EventType)->first();
+        $catalogServices = $eventType ? $eventType->services : Service::all();
+        $suppliers = Supplier::with(['services', 'listings'])->orderBy('business_name')->get();
+
+        return view('admin.bookings.show', compact('booking', 'catalogServices', 'suppliers'));
+    }
+
+    /**
      * Update booking status.
      */
     public function updateStatus(Request $request, string $id)
     {
         $validated = $request->validate([
-            'status' => 'required|in:pending,confirmed,in progress,completed,cancelled',
+            'status' => 'required|in:pending,confirmed,in progress,in_progress,completed,cancelled',
         ]);
 
         $booking = Booking::with('user')->where('BookingID', $id)->firstOrFail();

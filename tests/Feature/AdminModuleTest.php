@@ -66,14 +66,46 @@ class AdminModuleTest extends TestCase
         ]);
     }
 
+    public function test_admin_can_view_booking_details_dossier_with_stages(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $booking = Booking::first();
+
+        $response = $this->actingAs($admin)->get("/admin/bookings/{$booking->BookingID}");
+        $response->assertStatus(200);
+        $response->assertSee('Reservation #' . $booking->BookingID);
+        $response->assertSee('Stage 1: Submitted');
+        $response->assertSee('Stage 2: Confirmed');
+        $response->assertSee('Stage 3: In Progress');
+        $response->assertSee('Stage 4: Completed');
+        $response->assertSee('Final Stage');
+
+        // Test quick advance transition to completed
+        $advanceRes = $this->actingAs($admin)->patch("/admin/bookings/{$booking->BookingID}/status", [
+            'status' => 'completed',
+        ]);
+        $advanceRes->assertRedirect();
+        $this->assertDatabaseHas('bookings', [
+            'BookingID' => $booking->BookingID,
+            'status' => 'completed',
+        ]);
+    }
+
     public function test_admin_can_view_and_manage_clients(): void
     {
         $admin = User::factory()->create(['role' => 'admin']);
         $client = User::factory()->create(['role' => 'buyer', 'username' => 'testclient99']);
 
+        // Test basic index view
         $viewRes = $this->actingAs($admin)->get('/admin/users');
         $viewRes->assertStatus(200);
         $viewRes->assertSee('testclient99');
+        $viewRes->assertSee('Registered Clients');
+
+        // Test activity filter
+        $activeRes = $this->actingAs($admin)->get('/admin/users?activity=inactive&sort=most_bookings');
+        $activeRes->assertStatus(200);
+        $activeRes->assertSee('testclient99');
 
         $delRes = $this->actingAs($admin)->delete("/admin/users/{$client->id}");
         $delRes->assertRedirect();
@@ -89,6 +121,7 @@ class AdminModuleTest extends TestCase
         $viewRes = $this->actingAs($admin)->get('/admin/suppliers');
         $viewRes->assertStatus(200);
         $viewRes->assertSee('Vendor Directory');
+        $viewRes->assertSee('Onboard New Supplier');
 
         $createRes = $this->actingAs($admin)->post('/admin/suppliers', [
             'username' => 'newvendor99',
@@ -109,6 +142,80 @@ class AdminModuleTest extends TestCase
         $this->assertDatabaseHas('suppliers', [
             'business_name' => 'Sunil Floral Artists',
             'location' => 'Galle, Southern Province',
+        ]);
+    }
+
+    public function test_admin_can_onboard_supplier_with_accredited_services(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $service = \App\Models\Service::first();
+
+        $createRes = $this->actingAs($admin)->post('/admin/suppliers', [
+            'username' => 'servicevendor',
+            'fullname' => 'Nimal Jayawardena',
+            'email' => 'nimal.jay@gmail.com',
+            'password' => 'secret123',
+            'business_name' => 'Nimal Cinematic Studio',
+            'category' => 'Photography & Cinematography',
+            'contact_phone' => '+94 71 999 8888',
+            'location' => 'Kandy, Central Province',
+            'services' => [$service->service_id],
+        ]);
+
+        $createRes->assertRedirect();
+        $supplier = Supplier::where('business_name', 'Nimal Cinematic Studio')->firstOrFail();
+        $this->assertDatabaseHas('supplier_services', [
+            'supplier_id' => $supplier->id,
+            'service_id' => $service->service_id,
+        ]);
+    }
+
+    public function test_admin_can_update_supplier_and_sync_services(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $supplier = Supplier::first();
+        $service = \App\Models\Service::first();
+
+        $updateRes = $this->actingAs($admin)->put("/admin/suppliers/{$supplier->id}", [
+            'business_name' => 'Updated Business Name',
+            'fullname' => 'Updated Owner Name',
+            'category' => 'Updated Category',
+            'contact_phone' => '+94 77 555 4444',
+            'location' => 'Colombo 03',
+            'services' => [$service->service_id],
+        ]);
+
+        $updateRes->assertRedirect();
+        $this->assertDatabaseHas('suppliers', [
+            'id' => $supplier->id,
+            'business_name' => 'Updated Business Name',
+        ]);
+        $this->assertDatabaseHas('supplier_services', [
+            'supplier_id' => $supplier->id,
+            'service_id' => $service->service_id,
+        ]);
+    }
+
+    public function test_admin_can_delete_supplier(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $user = User::factory()->create(['role' => 'supplier']);
+        $supplier = Supplier::create([
+            'user_id' => $user->id,
+            'business_name' => 'Supplier To Remove',
+            'category' => 'Temporary',
+            'contact_phone' => '+94 77 000 0000',
+            'location' => 'Negombo',
+        ]);
+
+        $delRes = $this->actingAs($admin)->delete("/admin/suppliers/{$supplier->id}");
+        $delRes->assertRedirect();
+
+        $this->assertDatabaseMissing('suppliers', [
+            'id' => $supplier->id,
+        ]);
+        $this->assertDatabaseMissing('users', [
+            'id' => $user->id,
         ]);
     }
 
