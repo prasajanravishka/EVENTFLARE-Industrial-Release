@@ -32,15 +32,26 @@ class AdminDashboardController extends Controller
         ];
 
         // Monthly bookings chart for current year
-        $monthlyBookings = Booking::select(
-            DB::raw("DATE_FORMAT(EventDate, '%b') as month_label"),
-            DB::raw("MONTH(EventDate) as m"),
-            DB::raw("COUNT(*) as cnt")
-        )
-        ->whereYear('EventDate', date('Y'))
-        ->groupBy('m', 'month_label')
-        ->orderBy('m')
-        ->get();
+        if (DB::connection()->getDriverName() === 'sqlite') {
+            $monthlyBookings = Booking::select(
+                DB::raw("strftime('%m', EventDate) as m"),
+                DB::raw("COUNT(*) as cnt")
+            )
+            ->whereRaw("strftime('%Y', EventDate) = ?", [date('Y')])
+            ->groupBy('m')
+            ->orderBy('m')
+            ->get();
+        } else {
+            $monthlyBookings = Booking::select(
+                DB::raw("DATE_FORMAT(EventDate, '%b') as month_label"),
+                DB::raw("MONTH(EventDate) as m"),
+                DB::raw("COUNT(*) as cnt")
+            )
+            ->whereYear('EventDate', date('Y'))
+            ->groupBy('m', 'month_label')
+            ->orderBy('m')
+            ->get();
+        }
 
         $chartLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
         $chartData = array_fill(0, 12, 0);

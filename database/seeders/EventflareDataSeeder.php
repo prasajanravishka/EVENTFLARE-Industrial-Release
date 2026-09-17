@@ -7,14 +7,23 @@ use Illuminate\Support\Facades\DB;
 
 class EventflareDataSeeder extends Seeder
 {
+    private function runSql(string $sql): void
+    {
+        if (DB::getDriverName() === 'sqlite') {
+            $sql = str_replace('INSERT IGNORE INTO', 'INSERT OR IGNORE INTO', $sql);
+            $sql = str_replace("\\'", "''", $sql);
+        }
+        DB::unprepared($sql);
+    }
+
     public function run(): void
     {
-        DB::unprepared("INSERT IGNORE INTO `event_types` (`event_type_id`, `type_name`, `description`, `is_active`) VALUES (1, 'Weddings',       'Elegant setups with floral arrangements, luxurious staging, and music.', 1),
+        $this->runSql("INSERT IGNORE INTO `event_types` (`event_type_id`, `type_name`, `description`, `is_active`) VALUES (1, 'Weddings',       'Elegant setups with floral arrangements, luxurious staging, and music.', 1),
 (2, 'Get Togethers',  'Reconnections with friends/family featuring custom buffet layouts.',     1),
 (3, 'Birthdays',      'Unforgettable experiences with customized themes, cakes, and games.',    1),
 (4, 'DJ Parties',     'High-energy events with top-tier DJs, sound systems, and neon lighting.',1),
 (5, 'Hotel Venues',   'Luxurious hotels and elegant halls for premium hosting facilities.',     1);");
-        DB::unprepared("INSERT IGNORE INTO `services` (`event_type_id`, `service_name`, `description`, `priority_rank`, `is_required`, `typical_capacity`, `notes`) VALUES (1, 'Poruwa/Decorators',
+        $this->runSql("INSERT IGNORE INTO `services` (`event_type_id`, `service_name`, `description`, `priority_rank`, `is_required`, `typical_capacity`, `notes`) VALUES (1, 'Poruwa/Decorators',
        'Poruwa/Decorators',
        1, 1, 250,
        'Traditional Poruwa ceremony setup with floral and lighting decorations. Must be booked at least 4 weeks in advance.'),
@@ -43,7 +52,7 @@ class EventflareDataSeeder extends Seeder
        'Photography & Videography',
        6, 1, 300,
        'Professional photo and video coverage including pre-shoot, ceremony, and reception highlights.');");
-        DB::unprepared("INSERT IGNORE INTO `services` (`event_type_id`, `service_name`, `description`, `priority_rank`, `is_required`, `typical_capacity`, `notes`) VALUES (2, 'Catering',
+        $this->runSql("INSERT IGNORE INTO `services` (`event_type_id`, `service_name`, `description`, `priority_rank`, `is_required`, `typical_capacity`, `notes`) VALUES (2, 'Catering',
        'Catering',
        1, 1, 100,
        'Buffet or plated meal service tailored for casual and semi-formal gatherings.'),
@@ -57,7 +66,7 @@ class EventflareDataSeeder extends Seeder
        'Light Entertainment',
        3, 0, 100,
        'Acoustic music, lawn games, or a small PA system for background entertainment.');");
-        DB::unprepared("INSERT IGNORE INTO `services` (`event_type_id`, `service_name`, `description`, `priority_rank`, `is_required`, `typical_capacity`, `notes`) VALUES (3, 'Decorators',
+        $this->runSql("INSERT IGNORE INTO `services` (`event_type_id`, `service_name`, `description`, `priority_rank`, `is_required`, `typical_capacity`, `notes`) VALUES (3, 'Decorators',
        'Decorators',
        1, 1, 80,
        'Themed balloon arches, banners, table centrepieces, and stage backdrops.'),
@@ -76,7 +85,7 @@ class EventflareDataSeeder extends Seeder
        'Catering',
        4, 1, 100,
        'Party-style catering with finger food, snack platters, and kid-friendly menus.');");
-        DB::unprepared("INSERT IGNORE INTO `services` (`event_type_id`, `service_name`, `description`, `priority_rank`, `is_required`, `typical_capacity`, `notes`) VALUES (4, 'Audio/Visual (A/V)',
+        $this->runSql("INSERT IGNORE INTO `services` (`event_type_id`, `service_name`, `description`, `priority_rank`, `is_required`, `typical_capacity`, `notes`) VALUES (4, 'Audio/Visual (A/V)',
        'Audio/Visual (A/V)',
        1, 1, 500,
        'Full sound system, LED walls, laser lighting, and fog machines. Venue power supply must be verified.'),
@@ -100,7 +109,7 @@ class EventflareDataSeeder extends Seeder
        'Security',
        5, 1, 500,
        'Trained security personnel for crowd control, entry screening, and emergency response.');");
-        DB::unprepared("INSERT IGNORE INTO `services` (`event_type_id`, `service_name`, `description`, `priority_rank`, `is_required`, `typical_capacity`, `notes`) VALUES (5, 'Elegant Halls/Banquet Spaces',
+        $this->runSql("INSERT IGNORE INTO `services` (`event_type_id`, `service_name`, `description`, `priority_rank`, `is_required`, `typical_capacity`, `notes`) VALUES (5, 'Elegant Halls/Banquet Spaces',
        'Elegant Halls/Banquet Spaces',
        1, 1, 400,
        'Grand ballrooms or banquet halls with stage, AV hookups, and flexible seating layouts.'),
@@ -119,7 +128,7 @@ class EventflareDataSeeder extends Seeder
        'Logistics & Parking',
        4, 1, 400,
        'Valet service, signage, shuttle coordination, and dedicated parking lot allocation.');");
-        DB::unprepared("INSERT IGNORE INTO `users` (`id`, `username`, `fullname`, `email`, `password`, `role`) VALUES (1, 'admin', 'System Administrator', 'admin@eventflare.com', '\$2y\$10\$5CoyYp2jWvYbjQrrJuantOxjaI8jOpXwFma2XC83KRnnjH6hAzSGi', 'admin'),
+        $this->runSql("INSERT IGNORE INTO `users` (`id`, `username`, `fullname`, `email`, `password`, `role`) VALUES (1, 'admin', 'System Administrator', 'admin@eventflare.com', '\$2y\$10\$5CoyYp2jWvYbjQrrJuantOxjaI8jOpXwFma2XC83KRnnjH6hAzSGi', 'admin'),
 (2, 'sarah.admin', 'Sarah Alwis', 'sarah.alwis@eventflare.com', '\$2y\$10\$5CoyYp2jWvYbjQrrJuantOxjaI8jOpXwFma2XC83KRnnjH6hAzSGi', 'admin'),
 (3, 'dilan.audit', 'Dilan Jayasinghe', 'dilan.audit@eventflare.com', '\$2y\$10\$5CoyYp2jWvYbjQrrJuantOxjaI8jOpXwFma2XC83KRnnjH6hAzSGi', 'admin'),
 
@@ -140,7 +149,7 @@ class EventflareDataSeeder extends Seeder
 (27, 'ranranga_cultural', 'Pradeep Gunawardana', 'bookings@ranrangadance.lk', '\$2y\$10\$1WTOO2DDmoN62GoZPbrMOOnGivrzbEhQ/eJGwTJTq1HOObIC6kn4S', 'supplier'),
 (28, 'aegis_security', 'Capt. Sumith Bandara', 'operations@aegisprotection.lk', '\$2y\$10\$1WTOO2DDmoN62GoZPbrMOOnGivrzbEhQ/eJGwTJTq1HOObIC6kn4S', 'supplier'),
 (29, 'velvet_mixology', 'Tariq Mansoor', 'bar@velvetmixology.lk', '\$2y\$10\$1WTOO2DDmoN62GoZPbrMOOnGivrzbEhQ/eJGwTJTq1HOObIC6kn4S', 'supplier');");
-        DB::unprepared("INSERT IGNORE INTO `suppliers` (`id`, `user_id`, `business_name`, `category`, `description`, `contact_phone`, `location`, `logo_url`) VALUES (1, 20, 'Grand Royal Banquet & Catering', 'Catering', 'Premier luxury catering service specializing in 5-star wedding banquets, corporate dining, and bespoke buffet installations across the island.', '+94 11 269 4820', 'Colombo 07', 'https://images.unsplash.com/photo-1555244162-803834f70033?w=300'),
+        $this->runSql("INSERT IGNORE INTO `suppliers` (`id`, `user_id`, `business_name`, `category`, `description`, `contact_phone`, `location`, `logo_url`) VALUES (1, 20, 'Grand Royal Banquet & Catering', 'Catering', 'Premier luxury catering service specializing in 5-star wedding banquets, corporate dining, and bespoke buffet installations across the island.', '+94 11 269 4820', 'Colombo 07', 'https://images.unsplash.com/photo-1555244162-803834f70033?w=300'),
 (2, 21, 'Lotus Floral Elegance & Decor', 'Decorators', 'Master wedding designers and florists specializing in royal Poruwa setups, grand balloon installations, and custom thematic stage backdrops.', '+94 81 223 9012', 'Kandy City', 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=300'),
 (3, 22, 'Lumina Audio Visual & Stage Rigging', 'Audio/Visual (A/V)', 'High-end concert-grade audio engineering, intelligent moving heads, outdoor LED walls, lasers, and professional stage trussing.', '+94 77 341 8892', 'Mount Lavinia', 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=300'),
 (4, 23, 'The Grand Cinnamon Cove Resort & Spa', 'Hotel Venues', '5-star beachfront resort providing sweeping oceanview ballrooms, luxury guest accommodations, and full-service valet parking.', '+94 91 438 7700', 'Galle Fort', 'https://images.unsplash.com/photo-1566073771259-6a8506099945?w=300'),
@@ -150,7 +159,7 @@ class EventflareDataSeeder extends Seeder
 (8, 27, 'Ranranga Traditional Dance & Choral Ensemble', 'Cultural Performers', 'Celebrated traditional cultural troupe providing authentic Kandyan Ves dancers, Pantheru drummers, revered Ashtaka narrators, and Jayamangala Gatha choir vocalists.', '+94 81 334 1198', 'Pilimathalawa, Kandy', 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=300'),
 (9, 28, 'Aegis Event Security & Valet Services', 'Security', 'Licensed, professional event security personnel, bouncer details, metal detection entry screening, VIP escort services, and trained valet drivers.', '+94 11 250 8831', 'Colombo 05', 'https://images.unsplash.com/photo-1582139329536-e7284fece509?w=300'),
 (10, 29, 'Velvet Mobile Cocktail Bar & Mixology', 'Bar & Beverage Services', 'Sophisticated mobile bar setup with flair mixologists, custom signature cocktail menus, craft mocktails, ice carving, and premium glassware hire.', '+94 77 620 9944', 'Colombo 07', 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=300');");
-        DB::unprepared("INSERT IGNORE INTO `supplier_services` (`supplier_id`, `service_id`) VALUES (1, 5),   -- Grand Royal -> Catering (Weddings)
+        $this->runSql("INSERT IGNORE INTO `supplier_services` (`supplier_id`, `service_id`) VALUES (1, 5),   -- Grand Royal -> Catering (Weddings)
 (1, 7),   -- Grand Royal -> Catering (Get Togethers)
 (1, 13),  -- Grand Royal -> Catering (Birthdays)
 (1, 20),  -- Grand Royal -> In-House Catering (Hotel Venues)
@@ -174,7 +183,7 @@ class EventflareDataSeeder extends Seeder
 (9, 18),  -- Aegis Security -> Security (DJ Parties)
 (9, 22),  -- Aegis Security -> Logistics & Parking (Hotel Venues)
 (10, 17);");
-        DB::unprepared("INSERT IGNORE INTO `supplier_listings` (`listing_id`, `supplier_id`, `service_id`, `title`, `description`, `price`, `price_type`, `capacity`, `image_url`, `status`) VALUES (1, 1, 5, 'Platinum Wedding Feast (3-Course Buffet)', 'Five-star wedding banquet comprising multi-cuisine salads, signature carvery, 4 international meats, seafood specialties, and 12 delectable desserts.', 4800.00, 'per_person', 450, 'https://images.unsplash.com/photo-1555244162-803834f70033?w=500', 'active'),
+        $this->runSql("INSERT IGNORE INTO `supplier_listings` (`listing_id`, `supplier_id`, `service_id`, `title`, `description`, `price`, `price_type`, `capacity`, `image_url`, `status`) VALUES (1, 1, 5, 'Platinum Wedding Feast (3-Course Buffet)', 'Five-star wedding banquet comprising multi-cuisine salads, signature carvery, 4 international meats, seafood specialties, and 12 delectable desserts.', 4800.00, 'per_person', 450, 'https://images.unsplash.com/photo-1555244162-803834f70033?w=500', 'active'),
 (2, 1, 7, 'Cocktail & Canapés Evening Reception', 'Exquisite selection of warm & cold artisan hors d\'oeuvres, live sushi rolling, slider bar, and gourmet dessert shooters.', 3200.00, 'per_person', 300, 'https://images.unsplash.com/photo-1505236858219-8359eb29e329?w=500', 'active'),
 (3, 1, 13, 'Kids Fiesta Birthday Buffet & Snacks', 'Colorful party spread featuring mini burger sliders, chicken nuggets, waffle cones, french fries, and fruit skewers.', 2500.00, 'per_person', 120, 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=500', 'active'),
 
@@ -210,7 +219,7 @@ class EventflareDataSeeder extends Seeder
 
 (26, 10, 17, 'Premium Mobile Cocktail Bar & Mixologists (5 Hours)', 'Illuminated bar station, 2 master flair mixologists, artisan syrups, dehydrated garnishes, premium ice, and custom cocktail menu.', 110000.00, 'total_package', 400, 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=500', 'active'),
 (27, 10, 17, 'Mocktail Bar & Artisan Lemonade Station', 'Non-alcoholic craft beverage bar with fresh fruit infusions, botanical spritzers, and organic fruit purees.', 45000.00, 'total_package', 250, 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=500', 'active');");
-        DB::unprepared("INSERT IGNORE INTO `bookings` (`BookingID`, `user_id`, `user_name`, `EventType`, `Place`, `NumberOfGuests`, `EventDate`, `DayNight`, `FoodPreferences`, `ExtraDetails`, `status`) VALUES ('BKG-WED-2026-01', 10, 'kasun.perera', 'Weddings', 'The Grand Cinnamon Cove Ballroom, Galle', 280, '2026-10-24', 'Night', 'Buffet', 'Poruwa ceremony, 3-course dinner, drone photography, live band.', 'confirmed'),
+        $this->runSql("INSERT IGNORE INTO `bookings` (`BookingID`, `user_id`, `user_name`, `EventType`, `Place`, `NumberOfGuests`, `EventDate`, `DayNight`, `FoodPreferences`, `ExtraDetails`, `status`) VALUES ('BKG-WED-2026-01', 10, 'kasun.perera', 'Weddings', 'The Grand Cinnamon Cove Ballroom, Galle', 280, '2026-10-24', 'Night', 'Buffet', 'Poruwa ceremony, 3-course dinner, drone photography, live band.', 'confirmed'),
 ('BKG-DJ-2026-02', 11, 'dilhani.s', 'DJ Parties', 'Sunset Beachside Lawn, Mount Lavinia', 350, '2026-11-14', 'Night', 'Cocktail/Snacks', 'Neon lasers, heavy bass sound system, professional security.', 'pending'),
 ('BKG-BDAY-2026-03', 12, 'nimal.fernando', 'Birthdays', 'Waters Edge Pavilion, Battaramulla', 75, '2026-09-28', 'Day', 'Buffet', 'Circus theme, magician, custom 2-tier chocolate cake.', 'in_progress'),
 ('BKG-HOTEL-2026-04', 13, 'ananya.sharma', 'Hotel Venues', 'Shangri-La Main Ballroom, Colombo', 220, '2026-06-15', 'Day', 'Set Menu', 'Corporate gala setup, AV podium, plated 3-course lunch.', 'completed'),
@@ -220,7 +229,7 @@ class EventflareDataSeeder extends Seeder
 ('BKG-HOTEL-2026-08', 11, 'dilhani.s', 'Hotel Venues', 'Jetwing Lighthouse, Galle', 150, '2026-08-20', 'Night', 'Buffet', 'Alumni annual reunion dinner, oceanfront seating.', 'completed'),
 ('BKG-BDAY-2026-09', 13, 'ananya.sharma', 'Birthdays', 'Earls Regency Grand Ballroom, Kandy', 90, '2026-10-05', 'Night', 'Buffet', 'Golden jubilee 50th birthday dinner, live acoustic trio.', 'in_progress'),
 ('BKG-GET-2026-10', 12, 'nimal.fernando', 'Get Togethers', 'Bolgoda Lake Resort, Moratuwa', 60, '2026-11-28', 'Day', 'Buffet', 'Family reunion picnic by the lake with lawn games.', 'pending');");
-        DB::unprepared("INSERT IGNORE INTO `event_extras` (`booking_id`, `equipment`, `food_style`) VALUES ('BKG-WED-2026-01', 'Stage Lighting, Floral Mandap, 4K Projector', 'International Buffet & Live Cooking'),
+        $this->runSql("INSERT IGNORE INTO `event_extras` (`booking_id`, `equipment`, `food_style`) VALUES ('BKG-WED-2026-01', 'Stage Lighting, Floral Mandap, 4K Projector', 'International Buffet & Live Cooking'),
 ('BKG-DJ-2026-02', 'Line Array Sound, Smoke Machine, Laser Rig', 'Finger Food & Mocktail Bar'),
 ('BKG-BDAY-2026-03', 'PA System, Party Balloons, Photo Booth', 'Dessert Table & Kids Finger Food'),
 ('BKG-HOTEL-2026-04', 'Podium Mics, Dual LED Screens, Sound System', 'Executive High Tea & Plated Lunch'),
@@ -230,7 +239,7 @@ class EventflareDataSeeder extends Seeder
 ('BKG-HOTEL-2026-08', 'Banquet Lighting & Podium Sound', 'Seafood Extravaganza Buffet'),
 ('BKG-BDAY-2026-09', 'Ambient Uplighting & Wireless Mics', 'Western Buffet & Custom Cake'),
 ('BKG-GET-2026-10', 'Portable Sound Box & Outdoor Canopy', 'Rice & Curry Feast with Dessert Counter');");
-        DB::unprepared("INSERT IGNORE INTO `booking_services` (`booking_id`, `service_id`, `supplier_id`, `listing_id`, `custom_notes`, `assigned_cost`, `status`) VALUES ('BKG-WED-2026-01', 1, 2, 4, 'Theme colors: Ivory and blush pink with gold accents', 225000.00, 'confirmed'),
+        $this->runSql("INSERT IGNORE INTO `booking_services` (`booking_id`, `service_id`, `supplier_id`, `listing_id`, `custom_notes`, `assigned_cost`, `status`) VALUES ('BKG-WED-2026-01', 1, 2, 4, 'Theme colors: Ivory and blush pink with gold accents', 225000.00, 'confirmed'),
 ('BKG-WED-2026-01', 5, 1, 1, '280 guests at Rs. 4,800/pax platinum buffet', 1344000.00, 'confirmed'),
 ('BKG-WED-2026-01', 6, 6, 16, 'Full day drone and 4K cinema coverage', 290000.00, 'confirmed'),
 ('BKG-DJ-2026-02', 14, 3, 7, 'Bass heavy setting required for open beach lawn', 185000.00, 'requested'),
@@ -242,7 +251,7 @@ class EventflareDataSeeder extends Seeder
 ('BKG-WED-2026-06', 1, 2, 4, 'Deep maroon and jasmine floral arrangements', 225000.00, 'confirmed'),
 ('BKG-WED-2026-06', 4, 8, 22, '12-member Ves dancers for traditional procession', 120000.00, 'confirmed'),
 ('BKG-WED-2026-06', 6, 6, 16, 'Pre-shoot plus wedding day documentary', 290000.00, 'confirmed');");
-        DB::unprepared("INSERT IGNORE INTO `budgets` (`user_name`, `booking_id`, `total_budget`, `food_budget`, `buffet_cost`, `beverages_cost`, `desserts_cost`, `snacks_cost`, `total_spent`, `remaining_budget`, `variance`) VALUES ('kasun.perera', 'BKG-WED-2026-01', 2500000.00, 1500000.00, 1344000.00, 180000.00, 120000.00, 50000.00, 2200000.00, 300000.00, 300000.00),
+        $this->runSql("INSERT IGNORE INTO `budgets` (`user_name`, `booking_id`, `total_budget`, `food_budget`, `buffet_cost`, `beverages_cost`, `desserts_cost`, `snacks_cost`, `total_spent`, `remaining_budget`, `variance`) VALUES ('kasun.perera', 'BKG-WED-2026-01', 2500000.00, 1500000.00, 1344000.00, 180000.00, 120000.00, 50000.00, 2200000.00, 300000.00, 300000.00),
 ('dilhani.s', 'BKG-DJ-2026-02', 750000.00, 250000.00, 0.00, 150000.00, 35000.00, 65000.00, 630000.00, 120000.00, 120000.00),
 ('nimal.fernando', 'BKG-BDAY-2026-03', 350000.00, 180000.00, 120000.00, 25000.00, 42000.00, 20000.00, 310000.00, 40000.00, 40000.00),
 ('ananya.sharma', 'BKG-HOTEL-2026-04', 1800000.00, 950000.00, 700000.00, 150000.00, 80000.00, 50000.00, 1720000.00, 80000.00, 80000.00),
@@ -252,14 +261,14 @@ class EventflareDataSeeder extends Seeder
 ('dilhani.s', 'BKG-HOTEL-2026-08', 1500000.00, 900000.00, 750000.00, 150000.00, 80000.00, 40000.00, 1420000.00, 80000.00, 80000.00),
 ('ananya.sharma', 'BKG-BDAY-2026-09', 480000.00, 260000.00, 180000.00, 35000.00, 45000.00, 25000.00, 410000.00, 70000.00, 70000.00),
 ('nimal.fernando', 'BKG-GET-2026-10', 280000.00, 160000.00, 120000.00, 25000.00, 20000.00, 15000.00, 220000.00, 60000.00, 60000.00);");
-        DB::unprepared("INSERT IGNORE INTO `contact_messages` (`firstname`, `lastname`, `email`, `phone`, `message`, `is_read`) VALUES ('Kaveen', 'Jayasuriya', 'kaveen.j@gmail.com', '+94 77 123 9988', 'Hello, I am planning a wedding reception for 300 guests in Galle this December. Could you recommend top catering and decor suppliers who can collaborate?', 1),
+        $this->runSql("INSERT IGNORE INTO `contact_messages` (`firstname`, `lastname`, `email`, `phone`, `message`, `is_read`) VALUES ('Kaveen', 'Jayasuriya', 'kaveen.j@gmail.com', '+94 77 123 9988', 'Hello, I am planning a wedding reception for 300 guests in Galle this December. Could you recommend top catering and decor suppliers who can collaborate?', 1),
 ('Sanduni', 'Wickrama', 'sanduni.w@yahoo.com', '+94 71 445 2201', 'Inquiring about booking audio/visual stage lighting and an EDM DJ for a college graduation bash in Colombo. Are dates in November open?', 0),
 ('Dr. Priyantha', 'Dissanayake', 'priyantha.d@medicare.lk', '+94 81 223 4455', 'We require conference venue facilities with simultaneous translation headsets and live streaming for our annual medical seminar.', 1),
 ('Hansi', 'Madushani', 'hansi.m@gmail.com', '+94 76 890 1123', 'Can you provide a package quote for a 1st birthday party with balloon decor, 2-tier custom fondant cake, and kid entertainment?', 0),
 ('Lakshan', 'Weerakkody', 'lakshan.w@techpulse.io', '+94 70 332 9901', 'Interested in signing up as an official event partner for sound production and drone filming. Who should our team contact?', 0),
 ('Tharushi', 'Alwis', 'tharushi.alwis@gmail.com', '+94 77 554 8871', 'Thank you for coordinating our beach get-together last weekend! The food and acoustic music trio were phenomenal.', 1);");
 
-        DB::unprepared("INSERT IGNORE INTO `ratings` (`booking_id`, `user_id`, `supplier_id`, `rating`, `review_title`, `review_text`, `admin_status`) VALUES
+        $this->runSql("INSERT IGNORE INTO `ratings` (`booking_id`, `user_id`, `supplier_id`, `rating`, `review_title`, `review_text`, `admin_status`) VALUES
 ('BKG-WED-2026-01', 10, 1, 5, 'Exceptional Culinary Experience!', 'The 3-course wedding buffet was phenomenal! Guests could not stop praising the seafood and dessert stations. Highly recommend.', 'approved'),
 ('BKG-WED-2026-01', 10, 2, 5, 'Royal Poruwa Perfection', 'The Poruwa looked straight out of a fairy tale. The fresh flowers and lighting made our photos magical.', 'approved'),
 ('BKG-BDAY-2026-03', 12, 7, 5, 'Stunning 2-Tier Birthday Cake', 'Cake was moist, decadent and the theme was sculpted exactly as requested.', 'approved'),

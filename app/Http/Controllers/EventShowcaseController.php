@@ -5,62 +5,54 @@ namespace App\Http\Controllers;
 use App\Models\EventType;
 use App\Models\Service;
 use App\Models\SupplierListing;
+use App\Services\EventShowcaseData;
 use Illuminate\Http\Request;
 
 class EventShowcaseController extends Controller
 {
-    public function weddings()
+    private function buildShowcasePayload(string $eventTypeName): array
     {
-        $eventType = EventType::where('type_name', 'Weddings')->first();
+        $eventType = EventType::where('type_name', $eventTypeName)->first();
         $services = Service::where('event_type_id', $eventType?->event_type_id)
             ->with(['suppliers', 'listings' => function($q) { $q->where('status', 'active')->with('supplier'); }])
             ->orderBy('priority_rank')
             ->get();
 
-        return view('events.weddings', compact('eventType', 'services'));
+        $packages = SupplierListing::whereHas('service', function($q) use ($eventType) {
+                $q->where('event_type_id', $eventType?->event_type_id);
+            })
+            ->where('status', 'active')
+            ->with(['supplier', 'service'])
+            ->orderBy('listing_id', 'asc')
+            ->get();
+
+        $config = EventShowcaseData::getCategoryData($eventTypeName);
+
+        return compact('eventType', 'services', 'packages', 'config');
+    }
+
+    public function weddings()
+    {
+        return view('events.weddings', $this->buildShowcasePayload('Weddings'));
     }
 
     public function djParties()
     {
-        $eventType = EventType::where('type_name', 'DJ Parties')->first();
-        $services = Service::where('event_type_id', $eventType?->event_type_id)
-            ->with(['suppliers', 'listings' => function($q) { $q->where('status', 'active')->with('supplier'); }])
-            ->orderBy('priority_rank')
-            ->get();
-
-        return view('events.dj-parties', compact('eventType', 'services'));
+        return view('events.dj-parties', $this->buildShowcasePayload('DJ Parties'));
     }
 
     public function birthdays()
     {
-        $eventType = EventType::where('type_name', 'Birthdays')->first();
-        $services = Service::where('event_type_id', $eventType?->event_type_id)
-            ->with(['suppliers', 'listings' => function($q) { $q->where('status', 'active')->with('supplier'); }])
-            ->orderBy('priority_rank')
-            ->get();
-
-        return view('events.birthdays', compact('eventType', 'services'));
+        return view('events.birthdays', $this->buildShowcasePayload('Birthdays'));
     }
 
     public function hotels()
     {
-        $eventType = EventType::where('type_name', 'Hotel Venues')->first();
-        $services = Service::where('event_type_id', $eventType?->event_type_id)
-            ->with(['suppliers', 'listings' => function($q) { $q->where('status', 'active')->with('supplier'); }])
-            ->orderBy('priority_rank')
-            ->get();
-
-        return view('events.hotels', compact('eventType', 'services'));
+        return view('events.hotels', $this->buildShowcasePayload('Hotel Venues'));
     }
 
     public function getTogether()
     {
-        $eventType = EventType::where('type_name', 'Get Togethers')->first();
-        $services = Service::where('event_type_id', $eventType?->event_type_id)
-            ->with(['suppliers', 'listings' => function($q) { $q->where('status', 'active')->with('supplier'); }])
-            ->orderBy('priority_rank')
-            ->get();
-
-        return view('events.get-together', compact('eventType', 'services'));
+        return view('events.get-together', $this->buildShowcasePayload('Get Togethers'));
     }
 }

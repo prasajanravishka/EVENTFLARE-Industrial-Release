@@ -20,7 +20,7 @@
             <a href="{{ route('dashboard') }}" class="btn btn-secondary" style="border-radius: 30px; padding: 10px 20px; font-size: 13px;">
                 <i class="fas fa-arrow-left"></i> Dashboard Hub
             </a>
-            <a href="{{ route('booking.create') }}" class="btn btn-primary" style="border-radius: 30px; padding: 10px 20px; font-size: 13px;">
+            <a href="{{ route('events.index') }}" class="btn btn-primary" style="border-radius: 30px; padding: 10px 20px; font-size: 13px;">
                 <i class="fas fa-plus"></i> New Reservation
             </a>
         </div>
@@ -33,7 +33,7 @@
                 <i class="fas fa-calendar-times" style="font-size: 48px; opacity: 0.3; margin-bottom: 16px; display: block;"></i>
                 <h3 style="font-size: 20px; font-weight: 800; color: var(--text-heading); margin-bottom: 8px;">No Bookings on Record</h3>
                 <p style="margin-bottom: 20px; font-size: 14px;">You haven't initiated any event reservations with your account yet.</p>
-                <a href="{{ route('booking.create') }}" class="btn btn-primary" style="padding: 10px 24px; border-radius: 25px;">
+                <a href="{{ route('events.index') }}" class="btn btn-primary" style="padding: 10px 24px; border-radius: 25px;">
                     Reserve Your First Celebration
                 </a>
             </div>

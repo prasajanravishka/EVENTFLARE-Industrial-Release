@@ -28,9 +28,15 @@ class BookingController extends Controller
         $preGuests = (int) $request->query('guests', 0);
         $prePackage = $request->query('package', '');
         $preDetails = $request->query('details', '');
+        $preStyle = $request->query('style', '');
 
         if (!empty($prePackage) && empty($preDetails)) {
             $preDetails = 'Interested in Package: ' . $prePackage;
+        }
+
+        if (!empty($preStyle) && !str_contains($preDetails, 'Style:')) {
+            $styleLabel = 'Preferred Style/Theme: ' . ucfirst(str_replace('-', ' ', $preStyle));
+            $preDetails = !empty($preDetails) ? $preDetails . ' | ' . $styleLabel : $styleLabel;
         }
 
         // If specific category is requested, load itemized services and suppliers
@@ -46,6 +52,58 @@ class BookingController extends Controller
             }
         }
 
+        // Dedicated Wedding Tiers & Cultural Styles configuration
+        $cateringTiers = [
+            'Platinum' => [
+                'name' => 'Platinum Grand Tier',
+                'rate' => 6500.00,
+                'tagline' => '5-Course International Gourmet Buffet & Live Themed Carving Stations',
+                'highlights' => ['Unlimited Welcome Mocktails & Fresh Fruit Carafes', '3 Live Show-Cooking Stalls (Mongolian & Roast Ribs)', '12 Artisanal Desserts & Belgian Chocolate Fountain', 'Dedicated Head Waiter & White Glove Table Service'],
+                'badge' => 'Most Popular',
+            ],
+            'Executive' => [
+                'name' => 'Executive Royal Tier',
+                'rate' => 4800.00,
+                'tagline' => '3-Course Delicacy Buffet with Curated Ceylon & Continental Specialities',
+                'highlights' => ['Welcome Fruit Punch & Chilled Canapés', '2 Live Action Stations (Satay & Pasta Corner)', '8 Handcrafted Tropical & French Pastries', 'Trained Uniformed Banquet Captains'],
+                'badge' => 'Best Value',
+            ],
+            'Cocktail' => [
+                'name' => 'Twilight Cocktail Tier',
+                'rate' => 3200.00,
+                'tagline' => 'Gourmet Pass-Around Canapés, Artisan Sliders & Grazing Boards',
+                'highlights' => ['14 Signature Pass-Around Finger Food Selections', 'Artisanal European Cheese & Charcuterie Board', 'Live Dim Sum & Yakitori Brochette Stations', 'Specialized Mixologist Mocktail Station'],
+                'badge' => 'Chic & Light',
+            ],
+        ];
+
+        $culturalStyles = [
+            'Traditional' => [
+                'title' => 'Traditional Poruwa',
+                'icon' => 'fas fa-landmark',
+                'color' => '#f59e0b',
+                'desc' => 'Sacred Sinhala cultural rituals, Magul Bera drummers, Jayamangala chants & lotus mandaps.',
+            ],
+            'Western' => [
+                'title' => 'Western Elegance',
+                'icon' => 'fas fa-church',
+                'color' => '#60a5fa',
+                'desc' => 'Contemporary cathedral aisle styling, formal black-tie banquet, champagne toasts & first dance.',
+            ],
+            'Beach' => [
+                'title' => 'Coastal Beachside',
+                'icon' => 'fas fa-umbrella-beach',
+                'color' => '#34d399',
+                'desc' => 'Tropical sunset vows, floral timber canopies, ocean breezes & barefoot luxury ambiance.',
+            ],
+            'Ballroom' => [
+                'title' => 'Grand Luxury Ballroom',
+                'icon' => 'fas fa-gem',
+                'color' => '#f472b6',
+                'desc' => '5-Star hotel grandeur, crystal chandeliers, floral tunnels, and theatrical ambient wash.',
+            ],
+        ];
+
         return view('client.bookings.create', compact(
             'eventTypes',
             'preEvent',
@@ -53,8 +111,11 @@ class BookingController extends Controller
             'preGuests',
             'prePackage',
             'preDetails',
+            'preStyle',
             'selectedType',
-            'services'
+            'services',
+            'cateringTiers',
+            'culturalStyles'
         ));
     }
 
@@ -69,8 +130,14 @@ class BookingController extends Controller
             'NumberOfGuests' => 'required|integer|min:1|max:50000',
             'EventDate' => 'required|date|after_or_equal:today',
             'DayNight' => 'required|in:Day,Night',
-            'FoodPreferences' => 'required|string|max:100',
+            'FoodPreferences' => 'nullable|string|max:100',
+            'catering_tier' => 'nullable|string|max:50',
+            'cultural_style' => 'nullable|string|max:50',
+            'couple_names' => 'nullable|string|max:255',
+            'contact_phone' => 'nullable|string|max:30',
+            'contact_email' => 'nullable|email|max:150',
             'ExtraDetails' => 'nullable|string|max:2000',
+            'extra_details' => 'nullable|string|max:2000',
             'equipment' => 'nullable|string|max:255',
             'food_style' => 'nullable|string|max:100',
             'selected_packages' => 'nullable|array',
@@ -79,8 +146,31 @@ class BookingController extends Controller
 
         $user = Auth::user();
 
-        // Generate collision-resistant unique Booking ID (BKG + 8 uppercase hex)
-        $bookingId = 'BKG-' . strtoupper(Str::random(8));
+        // Determine food preferences & extra details
+        $foodPref = $validated['FoodPreferences'] ?? '';
+        if (!empty($validated['catering_tier'])) {
+            $foodPref = $validated['catering_tier'] . ' Tier';
+        }
+        if (empty($foodPref)) {
+            $foodPref = 'Executive Tier';
+        }
+
+        // Consolidated extra details
+        $extraDetails = $validated['ExtraDetails'] ?? $validated['extra_details'] ?? '';
+        if (!empty($validated['couple_names'])) {
+            $prefix = "Couple: " . $validated['couple_names'];
+            if (!empty($validated['contact_phone'])) {
+                $prefix .= " | Phone: " . $validated['contact_phone'];
+            }
+            if (!empty($validated['contact_email'])) {
+                $prefix .= " | Email: " . $validated['contact_email'];
+            }
+            $extraDetails = !empty($extraDetails) ? $prefix . " | " . $extraDetails : $prefix;
+        }
+
+        // Generate collision-resistant unique Booking ID (BKG-WED-XXXX or BKG-XXXX)
+        $isWedding = stripos($validated['EventType'], 'Wed') !== false;
+        $bookingId = ($isWedding ? 'BKG-WED-' : 'BKG-') . strtoupper(Str::random(8));
 
         DB::beginTransaction();
         try {
@@ -93,34 +183,45 @@ class BookingController extends Controller
                 'NumberOfGuests' => $validated['NumberOfGuests'],
                 'EventDate' => $validated['EventDate'],
                 'DayNight' => $validated['DayNight'],
-                'FoodPreferences' => $validated['FoodPreferences'],
-                'ExtraDetails' => $validated['ExtraDetails'] ?? null,
+                'FoodPreferences' => $foodPref,
+                'ExtraDetails' => $extraDetails ?: null,
                 'status' => 'pending',
             ]);
 
             // Persist optional event extras
-            if (!empty($validated['equipment']) || !empty($validated['food_style'])) {
-                EventExtra::create([
-                    'booking_id' => $bookingId,
-                    'equipment' => $validated['equipment'] ?? 'Standard Stage, Ambient Lighting & AV Setup',
-                    'food_style' => $validated['food_style'] ?? $validated['FoodPreferences'],
-                ]);
+            $foodStyle = $validated['food_style'] ?? '';
+            if (!empty($validated['cultural_style'])) {
+                $foodStyle = $validated['cultural_style'] . ' Wedding';
+            }
+            if (empty($foodStyle)) {
+                $foodStyle = $foodPref;
             }
 
-            // Persist package selections if any
+            EventExtra::create([
+                'booking_id' => $bookingId,
+                'equipment' => $validated['equipment'] ?? 'Traditional Poruwa Decor, Stage AV & Mood Lighting',
+                'food_style' => $foodStyle,
+            ]);
+
+            // Persist package selections with dynamic per-person vs flat fee cost
             if (!empty($validated['selected_packages'])) {
                 foreach ($validated['selected_packages'] as $serviceId => $listingId) {
                     if (!empty($listingId)) {
                         $listing = \App\Models\SupplierListing::find($listingId);
                         if ($listing) {
+                            $unitPrice = (float) $listing->price;
+                            $assignedCost = ($listing->price_type === 'per_person')
+                                ? ($unitPrice * (int) $validated['NumberOfGuests'])
+                                : $unitPrice;
+
                             BookingService::create([
                                 'booking_id' => $bookingId,
                                 'service_id' => $serviceId,
                                 'supplier_id' => $listing->supplier_id,
                                 'listing_id' => $listing->listing_id,
-                                'assigned_cost' => $listing->price,
+                                'assigned_cost' => $assignedCost,
                                 'status' => 'confirmed',
-                                'custom_notes' => 'Selected during initial booking wizard',
+                                'custom_notes' => 'Selected during booking: ' . $listing->title . ' (' . ucfirst(str_replace('_', ' ', $listing->price_type)) . ')',
                             ]);
                         }
                     }

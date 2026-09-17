@@ -30,8 +30,8 @@
     </main>
 
     <!-- Global Industrial Footer -->
-    <footer style="background: #0f172a; color: #94a3b8; padding: 60px 24px 30px 24px; margin-top: 80px; border-top: 1px solid rgba(255,255,255,0.05);">
-        <div style="max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 40px; margin-bottom: 40px;">
+    <footer style="background: #0f172a; color: #94a3b8; padding: 60px 40px 30px 40px; margin-top: 80px; border-top: 1px solid rgba(255,255,255,0.05); box-sizing: border-box;">
+        <div style="max-width: 100%; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 40px; margin-bottom: 40px;">
             <div>
                 <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 16px;">
                     <img src="{{ asset('assets/images/logo.png') }}" alt="EVENTFLARE" style="height: 36px;" onerror="this.style.display='none'">
@@ -77,7 +77,7 @@
             </div>
         </div>
 
-        <div style="max-width: 1200px; margin: 0 auto; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; font-size: 13px;">
+        <div style="max-width: 100%; margin: 0 auto; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; font-size: 13px;">
             <div>&copy; {{ date('Y') }} EVENTFLARE Platform. All Rights Reserved. Designed for Sri Lanka.</div>
             <div style="display: flex; gap: 20px;">
                 <a href="{{ route('terms') }}" style="color: #64748b; text-decoration: none;">Terms</a>

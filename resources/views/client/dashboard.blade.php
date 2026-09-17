@@ -17,7 +17,7 @@
             <p style="color: var(--text-muted); font-size: 15px;">Manage your Sri Lankan wedding, milestone party, and corporate reservations in one centralized hub.</p>
         </div>
         <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-            <a href="{{ route('booking.create') }}" class="btn btn-primary" style="padding: 12px 24px; border-radius: 30px; font-weight: 700;">
+            <a href="{{ route('events.index') }}" class="btn btn-primary" style="padding: 12px 24px; border-radius: 30px; font-weight: 700;">
                 <i class="fas fa-plus"></i> New Reservation
             </a>
             <a href="{{ route('client.bookings') }}" class="btn btn-secondary" style="padding: 12px 24px; border-radius: 30px; font-weight: 700;">
@@ -118,7 +118,7 @@
                 <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
                     <i class="fas fa-calendar-plus" style="font-size: 36px; opacity: 0.4; margin-bottom: 12px; display: block;"></i>
                     <p style="margin-bottom: 14px;">You have no reservations logged yet.</p>
-                    <a href="{{ route('booking.create') }}" class="btn btn-primary" style="font-size: 13px;">Start Your First Booking</a>
+                    <a href="{{ route('events.index') }}" class="btn btn-primary" style="font-size: 13px;">Start Your First Booking</a>
                 </div>
             @else
                 <div style="display: flex; flex-direction: column; gap: 12px;">

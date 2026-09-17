@@ -52,6 +52,9 @@ Route::middleware(['auth', 'buyer'])->group(function () {
     // Booking Creation & Lifecycle
     Route::get('/book', [BookingController::class, 'create'])->name('booking.create');
     Route::post('/book', [BookingController::class, 'store'])->name('booking.store');
+    Route::get('/events/wedding-booking', function (\Illuminate\Http\Request $request) {
+        return redirect()->route('booking.create', array_merge(['event' => 'Weddings'], $request->query()));
+    })->name('events.wedding-booking');
     Route::get('/my-bookings', [BookingController::class, 'index'])->name('client.bookings');
     Route::get('/my-bookings/{id}', [BookingController::class, 'show'])->name('client.bookings.show');
     Route::get('/my-bookings/{id}/pdf', [BookingController::class, 'pdf'])->name('client.bookings.pdf');

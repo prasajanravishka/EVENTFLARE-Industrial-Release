@@ -33,6 +33,8 @@ class ClientModuleTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('Customer Command Center');
         $response->assertSee('Active Bookings');
+        $response->assertSee(route('events.index'));
+        $response->assertSee('New Reservation');
     }
 
     public function test_buyer_can_view_booking_creation_form(): void

@@ -336,12 +336,14 @@ textarea:focus-visible {
 }
 
 .navbar-container {
-    max-width: 1240px;
+    width: 100%;
+    max-width: 100%;
     margin: 0 auto;
-    padding: 14px 24px;
+    padding: 14px 40px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    box-sizing: border-box;
 }
 
 .logo a {
