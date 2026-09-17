@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             EventflareDataSeeder::class,
             TestUsersSeeder::class,
+            CaseStudySeeder::class,
         ]);
     }
 }

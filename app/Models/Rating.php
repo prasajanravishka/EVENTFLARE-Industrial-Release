@@ -14,13 +14,26 @@ class Rating extends Model
         'user_id',
         'supplier_id',
         'rating',
+        'rating_quality',
+        'rating_punctuality',
+        'rating_communication',
+        'rating_value',
+        'photos',
         'review_title',
         'review_text',
+        'supplier_reply',
+        'supplier_replied_at',
         'admin_status',
     ];
 
     protected $casts = [
         'rating' => 'integer',
+        'rating_quality' => 'integer',
+        'rating_punctuality' => 'integer',
+        'rating_communication' => 'integer',
+        'rating_value' => 'integer',
+        'photos' => 'array',
+        'supplier_replied_at' => 'datetime',
     ];
 
     public function booking()

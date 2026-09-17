@@ -14,6 +14,11 @@ class EventType extends Model
     protected $fillable = [
         'type_name',
         'description',
+        'image_url',
+        'badge',
+        'chips',
+        'vendor_count_label',
+        'accent_color',
         'is_active',
     ];
 
@@ -21,9 +26,31 @@ class EventType extends Model
         'is_active' => 'boolean',
     ];
 
+    protected $appends = [
+        'image_display_url',
+    ];
+
+    public function getImageDisplayUrlAttribute(): ?string
+    {
+        if (!$this->image_url) {
+            return null;
+        }
+
+        if (str_starts_with($this->image_url, 'http://') || str_starts_with($this->image_url, 'https://')) {
+            return $this->image_url;
+        }
+
+        return asset(ltrim($this->image_url, '/'));
+    }
+
     public function services()
     {
         return $this->hasMany(Service::class, 'event_type_id', 'event_type_id');
+    }
+
+    public function caseStudies()
+    {
+        return $this->hasMany(CaseStudy::class, 'event_type_id', 'event_type_id');
     }
 
     public function scopeActive($query)

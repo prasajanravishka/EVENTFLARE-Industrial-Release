@@ -103,6 +103,31 @@
         </div>
     @endif
 
+    <!-- Celebration Feedback Spotlight Banner (if completed bookings with pending reviews) -->
+    @if(isset($pendingReviews) && $pendingReviews->isNotEmpty())
+        <div class="glass-card" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(236, 72, 153, 0.08)); border: 1px solid rgba(245, 158, 11, 0.35); padding: 24px; margin-bottom: 35px; border-radius: 18px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <div style="width: 50px; height: 50px; border-radius: 14px; background: rgba(245, 158, 11, 0.2); color: #f59e0b; display: flex; align-items: center; justify-content: center; font-size: 24px;">
+                        <i class="fas fa-star-half-alt"></i>
+                    </div>
+                    <div>
+                        <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #d97706; letter-spacing: 0.5px;">Celebration Feedback Opportunity</span>
+                        <h3 style="font-size: 18px; font-weight: 800; color: var(--text-heading); margin: 2px 0 4px;">
+                            How was your experience with {{ $pendingReviews->first()->supplier->business_name ?? 'your event specialist' }}?
+                        </h3>
+                        <p style="font-size: 13px; color: var(--text-muted); margin: 0;">
+                            Your celebration #{{ $pendingReviews->first()->booking_id }} concluded recently. Share your ratings, review vendors, and inspire future hosts!
+                        </p>
+                    </div>
+                </div>
+                <a href="{{ route('client.bookings.show', $pendingReviews->first()->booking_id) }}" class="btn btn-primary" style="background: #f59e0b; border-color: #f59e0b; font-weight: 800; padding: 10px 22px; font-size: 13px; border-radius: 25px;">
+                    <i class="fas fa-star"></i> Leave Feedback & Photos
+                </a>
+            </div>
+        </div>
+    @endif
+
     <!-- Recent Bookings Table & Quick Tools -->
     <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px; align-items: start;">
         <!-- Recent Reservations -->
@@ -148,8 +173,8 @@
                                 <span style="background: {{ $badge['bg'] }}; color: {{ $badge['color'] }}; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 14px; text-transform: capitalize;">
                                     {{ $st }}
                                 </span>
-                                <a href="{{ route('client.bookings.show', $b->BookingID) }}" class="btn btn-outline" style="padding: 5px 12px; font-size: 12px; border-radius: 15px; border: 1px solid #cbd5e1;">
-                                    Details
+                                <a href="{{ route('client.bookings.show', $b->BookingID) }}" class="btn btn-outline" style="font-size: 12px; padding: 5px 12px; border-radius: 15px;">
+                                    Details &rarr;
                                 </a>
                             </div>
                         </div>
@@ -158,8 +183,24 @@
             @endif
         </div>
 
-        <!-- Quick Planning Utilities -->
+        <!-- Quick Planning Utilities & Platform Feedback -->
         <div style="display: flex; flex-direction: column; gap: 20px;">
+            <!-- Platform Feedback & Voice Card -->
+            <div class="glass-card" style="padding: 22px; border-left: 4px solid #10b981;">
+                <div style="font-size: 24px; color: #10b981; margin-bottom: 10px;">
+                    <i class="fas fa-comment-dots"></i>
+                </div>
+                <h4 style="font-size: 16px; font-weight: 800; color: var(--text-heading); margin-bottom: 6px;">
+                    Rate Your EVENTFLARE Experience
+                </h4>
+                <p style="font-size: 13px; color: var(--text-muted); line-height: 1.5; margin-bottom: 14px;">
+                    How has your booking journey been? Send your suggestions directly to our product and concierge team.
+                </p>
+                <button type="button" class="btn btn-outline" style="width: 100%; border: 1px solid #10b981; color: #059669; font-size: 13px; font-weight: 700; padding: 9px;" onclick="openPlatformModal()">
+                    <i class="fas fa-paper-plane"></i> Send Platform Feedback
+                </button>
+            </div>
+
             <!-- Food Calculator Teaser -->
             <div class="glass-card" style="padding: 22px;">
                 <div style="font-size: 24px; color: #f59e0b; margin-bottom: 10px;">
@@ -195,4 +236,72 @@
     </div>
 
 </div>
+
+<!-- Modal: Platform Feedback & Net Promoter Score -->
+<div id="platformFeedbackModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
+    <div class="glass-card" style="background: #ffffff; border-radius: 20px; max-width: 520px; width: 100%; box-shadow: 0 25px 50px rgba(0,0,0,0.25); overflow: hidden; padding: 26px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">
+            <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: var(--text-heading);">
+                <i class="fas fa-comment-heart" style="color: #10b981; margin-right: 6px;"></i> EVENTFLARE Platform Feedback
+            </h3>
+            <button type="button" style="background: none; border: none; font-size: 22px; cursor: pointer; color: #94a3b8;" onclick="closePlatformModal()">&times;</button>
+        </div>
+
+        <form method="POST" action="{{ route('platform.feedback.store') }}">
+            @csrf
+            
+            <div style="margin-bottom: 18px;">
+                <label style="display: block; font-size: 13px; font-weight: 700; color: var(--text-heading); margin-bottom: 6px;">
+                    How likely are you to recommend EVENTFLARE to friends or colleagues? (NPS)
+                </label>
+                <div style="display: flex; gap: 4px; justify-content: space-between; margin-top: 6px;">
+                    @for($i = 0; $i <= 10; $i++)
+                        <label style="flex: 1; text-align: center; cursor: pointer;">
+                            <input type="radio" name="nps_score" value="{{ $i }}" {{ $i === 9 ? 'checked' : '' }} style="display: block; margin: 0 auto 4px;">
+                            <span style="font-size: 11px; font-weight: 700; color: #475569;">{{ $i }}</span>
+                        </label>
+                    @endfor
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 10px; color: var(--text-muted); margin-top: 4px;">
+                    <span>Not likely (0)</span>
+                    <span>Extremely likely (10)</span>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; font-size: 13px; font-weight: 700; color: var(--text-heading); margin-bottom: 6px;">
+                    Feedback Category
+                </label>
+                <select name="category" class="form-input" style="font-size: 13px;">
+                    <option value="booking_wizard">Booking Wizard & Customization</option>
+                    <option value="concierge">Concierge & Customer Support</option>
+                    <option value="supplier_quality">Supplier Selection & Quality</option>
+                    <option value="website">Website Usability & Speed</option>
+                    <option value="general" selected>General Suggestion / Idea</option>
+                </select>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; font-size: 13px; font-weight: 700; color: var(--text-heading); margin-bottom: 6px;">
+                    Your Comments & Suggestions
+                </label>
+                <textarea name="comments" class="form-input" rows="3" placeholder="Tell us what you liked or what we can do better..." required></textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" class="btn btn-secondary" onclick="closePlatformModal()" style="border-radius: 20px; font-size: 13px;">Cancel</button>
+                <button type="submit" class="btn btn-primary" style="background: #10b981; border-color: #10b981; border-radius: 20px; font-size: 13px; font-weight: 700;">Submit Feedback</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openPlatformModal() {
+        document.getElementById('platformFeedbackModal').style.display = 'flex';
+    }
+    function closePlatformModal() {
+        document.getElementById('platformFeedbackModal').style.display = 'none';
+    }
+</script>
 @endsection

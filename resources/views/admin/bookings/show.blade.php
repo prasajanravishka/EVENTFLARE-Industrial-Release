@@ -200,6 +200,18 @@
             <button onclick="window.print()" type="button" class="btn" style="background: #ffffff; border: 1px solid #e2e8f0; color: #1e293b; padding: 9px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;">
                 <i class="fas fa-print" style="color: var(--primary);"></i> Print Slip
             </button>
+
+            @if(in_array($booking->status, ['completed', 'confirmed', 'in progress', 'in_progress']))
+                @if($booking->caseStudy)
+                    <a href="{{ route('admin.portfolio.index') }}" class="btn" style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; padding: 9px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;" title="Portfolio showcase published for this event">
+                        <i class="fas fa-check-circle" style="color: #16a34a;"></i> In Portfolio
+                    </a>
+                @else
+                    <a href="{{ route('admin.portfolio.index', ['autofill_booking' => $booking->BookingID]) }}" class="btn btn-primary" style="padding: 9px 16px; border-radius: 10px; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 6px;" title="Convert verified booking details into a public portfolio case study">
+                        <i class="fas fa-camera-retro"></i> Showcase to Portfolio
+                    </a>
+                @endif
+            @endif
         </div>
     </div>
 

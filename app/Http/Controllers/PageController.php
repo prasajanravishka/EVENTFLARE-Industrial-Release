@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CaseStudy;
 use App\Models\ContactMessage;
 use App\Models\EventType;
 use App\Models\Rating;
@@ -19,57 +20,77 @@ class PageController extends Controller
             ->take(6)
             ->get();
 
-        $eventTypes = EventType::active()->withCount('services')->get();
+        $eventTypes = EventType::active()->withCount('services')->orderBy('event_type_id')->get();
         $supplierCount = Supplier::count();
         $popularLocations = ['Colombo', 'Kandy', 'Galle', 'Negombo', 'Bentota', 'Nuwara Eliya', 'Gampaha', 'Kalutara'];
 
-        // Gather all executed case studies across all event categories for the home page services section
+        // Gather executed celebrations & case studies from database
+        $dbCaseStudies = CaseStudy::active()->featured()->with('eventType')->orderBy('display_order', 'asc')->get();
+
         $allCaseStudies = [];
-        foreach (['Weddings', 'DJ Parties', 'Birthdays', 'Hotel Venues', 'Get Togethers'] as $catName) {
-            $catConfig = \App\Services\EventShowcaseData::getCategoryData($catName);
-            if (!empty($catConfig['case_studies'])) {
-                foreach ($catConfig['case_studies'] as $cs) {
-                    $cs['category_name'] = $catName;
-                    $cs['category_filter'] = match($catName) {
-                        'Weddings' => 'wedding',
-                        'DJ Parties' => 'dj',
-                        'Birthdays' => 'birthday',
-                        'Hotel Venues' => 'hotel',
-                        'Get Togethers' => 'gettogether',
-                        default => 'wedding'
-                    };
-                    $cs['showcase_route'] = match($catName) {
-                        'Weddings' => route('events.weddings'),
-                        'DJ Parties' => route('events.dj-parties'),
-                        'Birthdays' => route('events.birthdays'),
-                        'Hotel Venues' => route('events.hotels'),
-                        'Get Togethers' => route('events.get-together'),
-                        default => route('events.weddings')
-                    };
-                    $cs['booking_route'] = route('booking.create', ['event' => $catName]);
-                    $allCaseStudies[] = $cs;
+        if ($dbCaseStudies->isNotEmpty()) {
+            foreach ($dbCaseStudies as $cs) {
+                $catName = $cs->eventType?->type_name ?? $cs->category_label ?? 'Celebration';
+                $catTag = strtolower(trim($cs->category_tag));
+
+                $showcaseRoute = match($catTag) {
+                    'wedding', 'weddings' => route('events.weddings'),
+                    'dj', 'dj-parties', 'dj parties' => route('events.dj-parties'),
+                    'birthday', 'birthdays' => route('events.birthdays'),
+                    'hotel', 'hotels', 'hotel-venues' => route('events.hotels'),
+                    'gettogether', 'get-together', 'get togethers' => route('events.get-together'),
+                    default => route('events.index')
+                };
+
+                $allCaseStudies[] = [
+                    'id' => 'cs-' . $cs->id,
+                    'title' => $cs->title,
+                    'category' => $cs->category_tag,
+                    'category_lbl' => $cs->category_label ?? $catName,
+                    'category_name' => $catName,
+                    'category_filter' => $cs->category_tag,
+                    'venue' => $cs->venue,
+                    'date' => $cs->event_date,
+                    'guests' => $cs->guests_count,
+                    'image' => $cs->image_url,
+                    'tag' => $cs->tagline,
+                    'summary' => $cs->summary,
+                    'services' => $cs->services_delivered ?? [],
+                    'quote' => $cs->quote,
+                    'client' => $cs->client_name,
+                    'showcase_route' => $showcaseRoute,
+                    'booking_route' => route('booking.create', ['event' => $catName]),
+                ];
+            }
+        } else {
+            // Fallback to static EventShowcaseData if table is empty
+            foreach (['Weddings', 'DJ Parties', 'Birthdays', 'Hotel Venues', 'Get Togethers'] as $catName) {
+                $catConfig = \App\Services\EventShowcaseData::getCategoryData($catName);
+                if (!empty($catConfig['case_studies'])) {
+                    foreach ($catConfig['case_studies'] as $cs) {
+                        $cs['category_name'] = $catName;
+                        $cs['category_filter'] = match($catName) {
+                            'Weddings' => 'wedding',
+                            'DJ Parties' => 'dj',
+                            'Birthdays' => 'birthday',
+                            'Hotel Venues' => 'hotel',
+                            'Get Togethers' => 'gettogether',
+                            default => 'wedding'
+                        };
+                        $cs['showcase_route'] = match($catName) {
+                            'Weddings' => route('events.weddings'),
+                            'DJ Parties' => route('events.dj-parties'),
+                            'Birthdays' => route('events.birthdays'),
+                            'Hotel Venues' => route('events.hotels'),
+                            'Get Togethers' => route('events.get-together'),
+                            default => route('events.weddings')
+                        };
+                        $cs['booking_route'] = route('booking.create', ['event' => $catName]);
+                        $allCaseStudies[] = $cs;
+                    }
                 }
             }
         }
-
-        // Add Corporate & Bespoke Gala case study for 100% filter balance
-        $allCaseStudies[] = [
-            'id' => 'bkg-corp-01',
-            'title' => 'Virtusa Annual Global Leadership Summit & Gala',
-            'category' => 'corporate',
-            'category_lbl' => 'Corporate & Bespoke',
-            'category_name' => 'Corporate & Bespoke',
-            'category_filter' => 'corporate',
-            'venue' => 'Cinnamon Grand Atrium Ballroom, Colombo',
-            'date' => 'November 15, 2026',
-            'guests' => 350,
-            'image' => 'https://images.unsplash.com/photo-1511578314322-379afb476865?w=800&auto=format&fit=crop&q=80',
-            'tag' => 'Keynote Staging & Awards Banquet',
-            'summary' => 'A flagship multi-track corporate leadership summit featuring custom LED backdrop stages, simultaneous translation audio rigs, and a 5-course executive gala dinner.',
-            'showcase_route' => route('events.index'),
-            'booking_route' => route('booking.create', ['event' => 'Corporate & Bespoke']),
-            'client' => 'Virtusa Executive Council'
-        ];
 
         return view('pages.home', compact('reviews', 'eventTypes', 'supplierCount', 'popularLocations', 'allCaseStudies'));
     }

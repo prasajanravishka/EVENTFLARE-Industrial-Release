@@ -46,6 +46,11 @@
                 <i class="fas fa-layer-group"></i> Event Types
             </a>
         </li>
+        <li>
+            <a href="{{ route('admin.portfolio.index') }}" class="{{ $activePage === 'portfolio' ? 'active' : '' }}">
+                <i class="fas fa-photo-video"></i> Portfolio & Case Studies
+            </a>
+        </li>
 
         <li class="sidebar-section-header">People & Accounts</li>
         <li>

@@ -670,7 +670,7 @@
             </div>
             <div>
                 <span class="category-hook-badge">
-                    <i class="fas fa-check-circle" style="color: #10b981;"></i> {{ $wizardConfig['alert_hook'] }}
+                    <i class="fas fa-check-circle" style="color: #10b981;"></i> {!! $wizardConfig['alert_hook'] !!}
                 </span>
             </div>
             <h1 class="wizard-title">

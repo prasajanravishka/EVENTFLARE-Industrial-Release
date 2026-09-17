@@ -71,13 +71,34 @@ class ClientDashboardController extends Controller
             ->take(5)
             ->get();
 
+        // Pending Customer Feedback (Completed bookings or past confirmed celebrations with unrated suppliers)
+        $pendingReviews = BookingService::with(['booking', 'supplier', 'service'])
+            ->whereHas('booking', function ($query) use ($userId, $username) {
+                $query->where(function ($q) use ($userId, $username) {
+                    $q->where('user_id', $userId)->orWhere('user_name', $username);
+                })->where(function ($q) {
+                    $q->where('status', 'completed')
+                      ->orWhere(function ($sub) {
+                          $sub->where('status', 'confirmed')
+                              ->where('EventDate', '<=', Carbon::today());
+                      });
+                });
+            })
+            ->whereNotNull('supplier_id')
+            ->whereDoesntHave('booking.ratings', function ($q) {
+                $q->whereColumn('ratings.supplier_id', 'booking_services.supplier_id');
+            })
+            ->take(3)
+            ->get();
+
         return view('client.dashboard', compact(
             'activeCount',
             'nextEvent',
             'daysLeft',
             'suppliersCount',
             'completedCount',
-            'recentBookings'
+            'recentBookings',
+            'pendingReviews'
         ));
     }
 }

@@ -51,4 +51,9 @@ class Booking extends Model
     {
         return $this->hasMany(Rating::class, 'booking_id', 'BookingID');
     }
+
+    public function caseStudy()
+    {
+        return $this->hasOne(CaseStudy::class, 'booking_id', 'BookingID');
+    }
 }

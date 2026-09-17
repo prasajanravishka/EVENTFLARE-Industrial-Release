@@ -146,12 +146,52 @@
                                     $existingRating = $booking->ratings->firstWhere('supplier_id', $srv->supplier_id);
                                 @endphp
                                 <button type="button" class="btn btn-outline" style="padding: 6px 14px; font-size: 12px; border-radius: 20px; border: 1px solid #f59e0b; color: #b45309; background: #fffbeb;"
-                                        onclick="openRateModal('{{ $booking->BookingID }}', {{ $srv->supplier_id }}, '{{ addslashes($srv->supplier->business_name ?? '') }}', {{ $existingRating ? $existingRating->rating : 5 }}, '{{ addslashes($existingRating->review_title ?? '') }}', '{{ addslashes($existingRating->review_text ?? '') }}')">
+                                        onclick="openRateModal('{{ $booking->BookingID }}', {{ $srv->supplier_id }}, '{{ addslashes($srv->supplier->business_name ?? '') }}', {{ $existingRating ? $existingRating->rating : 5 }}, '{{ addslashes($existingRating->review_title ?? '') }}', '{{ addslashes($existingRating->review_text ?? '') }}', {{ $existingRating->rating_quality ?? 5 }}, {{ $existingRating->rating_punctuality ?? 5 }}, {{ $existingRating->rating_communication ?? 5 }}, {{ $existingRating->rating_value ?? 5 }}, '{{ addslashes($existingRating->supplier_reply ?? '') }}')">
                                     <i class="fas fa-star" style="color: #f59e0b;"></i>
                                     {{ $existingRating ? 'Edit Review (' . $existingRating->rating . '.0)' : 'Review Vendor' }}
                                 </button>
                             @endif
                         </div>
+
+                        <!-- Existing Review & Supplier Reply Preview -->
+                        @if(isset($existingRating) && $existingRating)
+                            <div style="width: 100%; margin-top: 10px; padding-top: 10px; border-top: 1px dashed #e2e8f0; font-size: 12px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                                    <span style="font-weight: 700; color: #1e293b;">
+                                        Your Verified Review: 
+                                        <span style="color: #f59e0b;"><i class="fas fa-star"></i> {{ $existingRating->rating }}.0</span>
+                                        @if($existingRating->review_title)
+                                            — "{{ $existingRating->review_title }}"
+                                        @endif
+                                    </span>
+                                    <span style="font-size: 11px; color: #94a3b8;">{{ $existingRating->updated_at->format('M d, Y') }}</span>
+                                </div>
+                                @if($existingRating->review_text)
+                                    <p style="margin: 0 0 6px; color: #64748b; font-style: italic;">"{{ $existingRating->review_text }}"</p>
+                                @endif
+
+                                <!-- Photo Thumbnails -->
+                                @if(!empty($existingRating->photos) && is_array($existingRating->photos))
+                                    <div style="display: flex; gap: 8px; margin-top: 6px; margin-bottom: 6px;">
+                                        @foreach($existingRating->photos as $photoUrl)
+                                            <a href="{{ asset($photoUrl) }}" target="_blank" style="display: block; width: 45px; height: 45px; border-radius: 6px; overflow: hidden; border: 1px solid #cbd5e1;">
+                                                <img src="{{ asset($photoUrl) }}" style="width: 100%; height: 100%; object-fit: cover;" alt="Event Photo">
+                                            </a>
+                                        @endforeach
+                                    </div>
+                                @endif
+
+                                <!-- Official Supplier Response -->
+                                @if($existingRating->supplier_reply)
+                                    <div style="background: rgba(139, 92, 246, 0.08); border-left: 3px solid var(--primary); padding: 8px 12px; border-radius: 6px; margin-top: 8px;">
+                                        <strong style="color: var(--primary); font-size: 12px;">
+                                            <i class="fas fa-reply fa-xs"></i> Official Response from {{ $srv->supplier->business_name ?? 'Vendor' }}:
+                                        </strong>
+                                        <p style="margin: 3px 0 0; color: #334155; font-size: 12px;">"{{ $existingRating->supplier_reply }}"</p>
+                                    </div>
+                                @endif
+                            </div>
+                        @endif
                     </div>
                 @endforeach
             </div>
@@ -181,65 +221,168 @@
 
 </div>
 
-<!-- Modal: Rate & Review Supplier -->
-<div id="rateSupplierModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
-    <div class="glass-card" style="background: #ffffff; border-radius: 20px; max-width: 500px; width: 100%; box-shadow: 0 25px 50px rgba(0,0,0,0.25); overflow: hidden; padding: 26px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">
-            <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: var(--text-heading);">
-                <i class="fas fa-star" style="color: #f59e0b; margin-right: 6px;"></i> Review Supplier
-            </h3>
+<!-- Modal: Rate & Review Supplier (Multi-Criteria & Photo Upload) -->
+<div id="rateSupplierModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(5px); z-index: 9999; align-items: center; justify-content: center; padding: 20px; overflow-y: auto;">
+    <div class="glass-card" style="background: #ffffff; border-radius: 20px; max-width: 540px; width: 100%; box-shadow: 0 25px 50px rgba(0,0,0,0.25); overflow: hidden; padding: 26px; max-height: 90vh; overflow-y: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid #f1f5f9; padding-bottom: 12px;">
+            <div>
+                <h3 style="margin: 0; font-size: 18px; font-weight: 800; color: var(--text-heading);">
+                    <i class="fas fa-star" style="color: #f59e0b; margin-right: 6px;"></i> Review & Endorse Specialist
+                </h3>
+                <span id="modalSupplierSubtitle" style="font-size: 12px; color: var(--text-muted); font-weight: 600;">Verified Event Supplier</span>
+            </div>
             <button type="button" style="background: none; border: none; font-size: 22px; cursor: pointer; color: #94a3b8;" onclick="closeRateModal()">&times;</button>
         </div>
 
-        <form method="POST" action="{{ route('ratings.store') }}">
+        <form method="POST" action="{{ route('ratings.store') }}" enctype="multipart/form-data">
             @csrf
             <input type="hidden" name="booking_id" id="modalBookingId">
             <input type="hidden" name="supplier_id" id="modalSupplierId">
             <input type="hidden" name="rating" id="modalRatingValue" value="5">
 
-            <div style="margin-bottom: 16px;">
-                <label style="display: block; font-size: 13px; font-weight: 700; color: var(--text-heading); margin-bottom: 6px;">
-                    Rating Score (1-5 Stars)
+            <!-- Overall Score -->
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 16px; margin-bottom: 16px; text-align: center;">
+                <label style="display: block; font-size: 12px; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px;">
+                    Overall Experience Rating
                 </label>
-                <div id="starContainer" style="display: flex; gap: 8px; font-size: 28px; cursor: pointer; color: #f59e0b;">
+                <div id="starContainer" style="display: flex; justify-content: center; gap: 10px; font-size: 32px; cursor: pointer; color: #f59e0b;">
                     <i class="fas fa-star" data-rating="1"></i>
                     <i class="fas fa-star" data-rating="2"></i>
                     <i class="fas fa-star" data-rating="3"></i>
                     <i class="fas fa-star" data-rating="4"></i>
                     <i class="fas fa-star" data-rating="5"></i>
                 </div>
+                <div style="font-size: 12px; font-weight: 700; color: #b45309; margin-top: 4px;" id="ratingScoreText">5.0 — Exceptional</div>
             </div>
 
+            <!-- Multi-Criteria Ratings -->
+            <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 14px 16px; margin-bottom: 16px;">
+                <label style="display: block; font-size: 12px; font-weight: 800; color: var(--text-heading); text-transform: uppercase; margin-bottom: 10px;">
+                    <i class="fas fa-sliders-h" style="color: var(--primary); margin-right: 4px;"></i> Detailed Criteria Scores
+                </label>
+                
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <!-- Quality -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
+                        <span style="color: #475569; font-weight: 600;">Quality & Artistry</span>
+                        <div class="criteria-stars" data-name="rating_quality" style="color: #f59e0b; cursor: pointer;">
+                            <input type="hidden" name="rating_quality" id="val_quality" value="5">
+                            @for($i = 1; $i <= 5; $i++)
+                                <i class="fas fa-star" data-val="{{ $i }}" onclick="setCriteria('rating_quality', {{ $i }})"></i>
+                            @endfor
+                        </div>
+                    </div>
+
+                    <!-- Punctuality -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
+                        <span style="color: #475569; font-weight: 600;">Punctuality & Schedule</span>
+                        <div class="criteria-stars" data-name="rating_punctuality" style="color: #f59e0b; cursor: pointer;">
+                            <input type="hidden" name="rating_punctuality" id="val_punctuality" value="5">
+                            @for($i = 1; $i <= 5; $i++)
+                                <i class="fas fa-star" data-val="{{ $i }}" onclick="setCriteria('rating_punctuality', {{ $i }})"></i>
+                            @endfor
+                        </div>
+                    </div>
+
+                    <!-- Communication -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
+                        <span style="color: #475569; font-weight: 600;">Communication & Service</span>
+                        <div class="criteria-stars" data-name="rating_communication" style="color: #f59e0b; cursor: pointer;">
+                            <input type="hidden" name="rating_communication" id="val_communication" value="5">
+                            @for($i = 1; $i <= 5; $i++)
+                                <i class="fas fa-star" data-val="{{ $i }}" onclick="setCriteria('rating_communication', {{ $i }})"></i>
+                            @endfor
+                        </div>
+                    </div>
+
+                    <!-- Value -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px;">
+                        <span style="color: #475569; font-weight: 600;">Value for Investment</span>
+                        <div class="criteria-stars" data-name="rating_value" style="color: #f59e0b; cursor: pointer;">
+                            <input type="hidden" name="rating_value" id="val_value" value="5">
+                            @for($i = 1; $i <= 5; $i++)
+                                <i class="fas fa-star" data-val="{{ $i }}" onclick="setCriteria('rating_value', {{ $i }})"></i>
+                            @endfor
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Review Title / Headline -->
             <div style="margin-bottom: 14px;">
                 <label style="display: block; font-size: 13px; font-weight: 700; color: var(--text-heading); margin-bottom: 6px;">
-                    Review Title / Headline
+                    Review Headline / Summary
                 </label>
-                <input type="text" name="review_title" id="modalReviewTitle" class="form-input" placeholder="e.g. Exceptional sound and punctual delivery">
+                <input type="text" name="review_title" id="modalReviewTitle" class="form-input" placeholder="e.g. Exceptional sound, stunning decor, and punctual arrival">
             </div>
 
+            <!-- Detailed Feedback Comments -->
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; font-size: 13px; font-weight: 700; color: var(--text-heading); margin-bottom: 6px;">
+                    Detailed Feedback & Experience
+                </label>
+                <textarea name="review_text" id="modalReviewText" class="form-input" rows="3" placeholder="Share your experience with this specialist to guide future celebration hosts..."></textarea>
+            </div>
+
+            <!-- Verified Celebration Photos Upload -->
             <div style="margin-bottom: 20px;">
                 <label style="display: block; font-size: 13px; font-weight: 700; color: var(--text-heading); margin-bottom: 6px;">
-                    Feedback & Comments
+                    <i class="fas fa-camera" style="color: var(--primary); margin-right: 4px;"></i> Upload Celebration Photos (Optional, max 3)
                 </label>
-                <textarea name="review_text" id="modalReviewText" class="form-input" rows="3" placeholder="Share your experience working with this supplier..."></textarea>
+                <input type="file" name="photos[]" id="modalPhotos" class="form-input" multiple accept="image/jpeg,image/png,image/webp" onchange="previewPhotos(event)">
+                <small style="display: block; font-size: 11px; color: var(--text-muted); margin-top: 4px;">
+                    Attach real photos of your event setup (e.g. stage, Poruwa, food, lighting).
+                </small>
+                <div id="photoPreviewBox" style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;"></div>
+            </div>
+
+            <!-- Supplier Reply Box (if previously replied) -->
+            <div id="modalSupplierReplyBox" style="display: none; background: #f8fafc; border-left: 3px solid var(--primary); padding: 12px; border-radius: 6px; margin-bottom: 18px; font-size: 12px;">
+                <strong style="color: var(--primary);"><i class="fas fa-reply"></i> Official Supplier Reply:</strong>
+                <p id="modalSupplierReplyText" style="margin: 4px 0 0; color: #334155; font-style: italic;"></p>
             </div>
 
             <div style="display: flex; justify-content: flex-end; gap: 10px;">
                 <button type="button" class="btn btn-secondary" onclick="closeRateModal()" style="border-radius: 20px; font-size: 13px;">Cancel</button>
-                <button type="submit" class="btn btn-primary" style="border-radius: 20px; font-size: 13px; font-weight: 700;">Submit Review</button>
+                <button type="submit" class="btn btn-primary" style="border-radius: 20px; font-size: 13px; font-weight: 700;">Submit Verified Review</button>
             </div>
         </form>
     </div>
 </div>
 
 <script>
-    function openRateModal(bookingId, supplierId, businessName, rating, title, text) {
+    const scoreDescriptions = {
+        1: '1.0 — Poor Experience',
+        2: '2.0 — Fair / Below Expectations',
+        3: '3.0 — Satisfactory / Average',
+        4: '4.0 — Very Good / High Quality',
+        5: '5.0 — Exceptional / Royal Standard'
+    };
+
+    function openRateModal(bookingId, supplierId, businessName, rating, title, text, quality, punctuality, communication, value, reply) {
         document.getElementById('modalBookingId').value = bookingId;
         document.getElementById('modalSupplierId').value = supplierId;
+        document.getElementById('modalSupplierSubtitle').innerText = businessName || 'Verified Specialist';
         document.getElementById('modalRatingValue').value = rating || 5;
         document.getElementById('modalReviewTitle').value = title || '';
         document.getElementById('modalReviewText').value = text || '';
+
         updateStars(rating || 5);
+        setCriteria('rating_quality', quality || rating || 5);
+        setCriteria('rating_punctuality', punctuality || rating || 5);
+        setCriteria('rating_communication', communication || rating || 5);
+        setCriteria('rating_value', value || rating || 5);
+
+        // Supplier reply display if available
+        const replyBox = document.getElementById('modalSupplierReplyBox');
+        if (reply) {
+            document.getElementById('modalSupplierReplyText').innerText = '"' + reply + '"';
+            replyBox.style.display = 'block';
+        } else {
+            replyBox.style.display = 'none';
+        }
+
+        document.getElementById('photoPreviewBox').innerHTML = '';
         const modal = document.getElementById('rateSupplierModal');
         modal.style.display = 'flex';
     }
@@ -251,12 +394,10 @@
     function updateStars(val) {
         document.querySelectorAll('#starContainer i').forEach(star => {
             const r = parseInt(star.getAttribute('data-rating'));
-            if (r <= val) {
-                star.className = 'fas fa-star';
-            } else {
-                star.className = 'far fa-star';
-            }
+            star.className = (r <= val) ? 'fas fa-star' : 'far fa-star';
         });
+        const label = scoreDescriptions[val] || (val + '.0');
+        document.getElementById('ratingScoreText').innerText = label;
     }
 
     document.querySelectorAll('#starContainer i').forEach(star => {
@@ -266,5 +407,41 @@
             updateStars(r);
         });
     });
+
+    function setCriteria(name, val) {
+        const inputId = name.replace('rating_', 'val_');
+        const input = document.getElementById(inputId);
+        if (input) input.value = val;
+
+        const container = document.querySelector(`.criteria-stars[data-name="${name}"]`);
+        if (container) {
+            container.querySelectorAll('i').forEach(star => {
+                const v = parseInt(star.getAttribute('data-val'));
+                star.className = (v <= val) ? 'fas fa-star' : 'far fa-star';
+            });
+        }
+    }
+
+    function previewPhotos(event) {
+        const box = document.getElementById('photoPreviewBox');
+        box.innerHTML = '';
+        const files = event.target.files;
+        if (files) {
+            for (let i = 0; i < Math.min(files.length, 3); i++) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    img.style.width = '60px';
+                    img.style.height = '60px';
+                    img.style.objectFit = 'cover';
+                    img.style.borderRadius = '8px';
+                    img.style.border = '1px solid #cbd5e1';
+                    box.appendChild(img);
+                };
+                reader.readAsDataURL(files[i]);
+            }
+        }
+    }
 </script>
 @endsection

@@ -63,6 +63,7 @@ class AdminBookingController extends Controller
             'services.listing',
             'extra',
             'ratings.user',
+            'caseStudy',
         ])->where('BookingID', $id)->firstOrFail();
 
         // Retrieve event type catalog services and available accredited suppliers for assignments

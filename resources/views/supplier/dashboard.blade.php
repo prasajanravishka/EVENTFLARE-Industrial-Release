@@ -94,26 +94,94 @@
                 <p style="margin: 0; font-size: 14px;">No customer ratings on record yet. Complete your assigned bookings to build verified reviews.</p>
             </div>
         @else
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 18px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px;">
                 @foreach($reviews as $rev)
-                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px;">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                            <div style="color: #f59e0b; font-size: 14px;">
-                                @for($i = 1; $i <= 5; $i++)
-                                    <i class="fas fa-star{{ $i <= $rev->rating ? '' : '-o' }}"></i>
-                                @endfor
-                                <strong style="color: #b45309; font-size: 13px; margin-left: 4px;">{{ $rev->rating }}.0</strong>
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between;">
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <div style="color: #f59e0b; font-size: 14px;">
+                                    @for($i = 1; $i <= 5; $i++)
+                                        <i class="fas fa-star{{ $i <= $rev->rating ? '' : '-o' }}"></i>
+                                    @endfor
+                                    <strong style="color: #b45309; font-size: 13px; margin-left: 4px;">{{ $rev->rating }}.0</strong>
+                                </div>
+                                <small style="color: #94a3b8; font-size: 11px;">{{ $rev->created_at->format('M d, Y') }}</small>
                             </div>
-                            <small style="color: #94a3b8; font-size: 11px;">{{ $rev->created_at->format('M d, Y') }}</small>
+
+                            <!-- Criteria Breakdown Badges -->
+                            @if($rev->rating_quality || $rev->rating_punctuality || $rev->rating_communication || $rev->rating_value)
+                                <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px;">
+                                    @if($rev->rating_quality)
+                                        <span style="font-size: 10px; font-weight: 700; background: #ede9fe; color: #6d28d9; padding: 2px 7px; border-radius: 10px;">
+                                            Quality: {{ $rev->rating_quality }}.0
+                                        </span>
+                                    @endif
+                                    @if($rev->rating_punctuality)
+                                        <span style="font-size: 10px; font-weight: 700; background: #ecfdf5; color: #047857; padding: 2px 7px; border-radius: 10px;">
+                                            Punctual: {{ $rev->rating_punctuality }}.0
+                                        </span>
+                                    @endif
+                                    @if($rev->rating_communication)
+                                        <span style="font-size: 10px; font-weight: 700; background: #eff6ff; color: #1d4ed8; padding: 2px 7px; border-radius: 10px;">
+                                            Service: {{ $rev->rating_communication }}.0
+                                        </span>
+                                    @endif
+                                    @if($rev->rating_value)
+                                        <span style="font-size: 10px; font-weight: 700; background: #fffbeb; color: #b45309; padding: 2px 7px; border-radius: 10px;">
+                                            Value: {{ $rev->rating_value }}.0
+                                        </span>
+                                    @endif
+                                </div>
+                            @endif
+
+                            @if($rev->review_title)
+                                <h4 style="font-size: 15px; font-weight: 800; color: var(--text-heading); margin: 0 0 6px;">{{ $rev->review_title }}</h4>
+                            @endif
+                            <p style="font-size: 13px; color: #64748b; line-height: 1.5; margin: 0 0 10px;">{{ $rev->review_text }}</p>
+
+                            <!-- Client Uploaded Photos -->
+                            @if(!empty($rev->photos) && is_array($rev->photos))
+                                <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                                    @foreach($rev->photos as $photo)
+                                        <a href="{{ asset($photo) }}" target="_blank" style="width: 48px; height: 48px; border-radius: 6px; overflow: hidden; border: 1px solid #cbd5e1; display: block;">
+                                            <img src="{{ asset($photo) }}" style="width: 100%; height: 100%; object-fit: cover;" alt="Event Setup">
+                                        </a>
+                                    @endforeach
+                                </div>
+                            @endif
+
+                            <!-- Official Supplier Response Display -->
+                            @if($rev->supplier_reply)
+                                <div style="background: rgba(139, 92, 246, 0.08); border-left: 3px solid var(--primary); padding: 10px 14px; border-radius: 6px; margin-top: 10px; font-size: 12px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+                                        <strong style="color: var(--primary);"><i class="fas fa-reply fa-xs"></i> Your Official Response:</strong>
+                                        <small style="color: #94a3b8;">{{ $rev->supplier_replied_at ? $rev->supplier_replied_at->format('M d, Y') : '' }}</small>
+                                    </div>
+                                    <p style="margin: 0; color: #334155; font-style: italic;">"{{ $rev->supplier_reply }}"</p>
+                                </div>
+                            @else
+                                <!-- Reply Form Toggle -->
+                                <div style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed #cbd5e1;">
+                                    <details style="font-size: 12px;">
+                                        <summary style="cursor: pointer; color: var(--primary); font-weight: 700;">
+                                            <i class="fas fa-reply"></i> Write Official Response to Client
+                                        </summary>
+                                        <form method="POST" action="{{ route('supplier.ratings.reply', $rev->id) }}" style="margin-top: 10px;">
+                                            @csrf
+                                            <textarea name="supplier_reply" class="form-input" rows="2" style="font-size: 12px; margin-bottom: 8px;" placeholder="Thank the client or share coordination remarks..." required></textarea>
+                                            <button type="submit" class="btn btn-primary" style="padding: 5px 14px; font-size: 11px; font-weight: 700; border-radius: 12px;">
+                                                Publish Response
+                                            </button>
+                                        </form>
+                                    </details>
+                                </div>
+                            @endif
                         </div>
-                        @if($rev->review_title)
-                            <h4 style="font-size: 15px; font-weight: 800; color: var(--text-heading); margin: 0 0 6px;">{{ $rev->review_title }}</h4>
-                        @endif
-                        <p style="font-size: 13px; color: #64748b; line-height: 1.5; margin: 0 0 10px;">{{ $rev->review_text }}</p>
-                        <div style="font-size: 12px; color: var(--text-muted); border-top: 1px dashed #cbd5e1; padding-top: 8px;">
+
+                        <div style="font-size: 12px; color: var(--text-muted); border-top: 1px dashed #cbd5e1; padding-top: 10px; margin-top: 12px;">
                             <i class="fas fa-user-check fa-xs" style="color: #10b981;"></i> {{ $rev->user->fullname ?? $rev->user->username }}
                             @if($rev->booking)
-                                &bull; <em>{{ $rev->booking->EventType }}</em>
+                                &bull; <em>{{ $rev->booking->EventType }} (#{{ $rev->booking_id }})</em>
                             @endif
                         </div>
                     </div>

@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminBookingController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminOperationsController;
+use App\Http\Controllers\Admin\AdminPortfolioController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Client\BookingController;
 use App\Http\Controllers\Client\ClientDashboardController;
@@ -48,6 +49,7 @@ Route::post('/food-calculator', [FoodCalculatorController::class, 'calculate'])-
 Route::middleware(['auth', 'buyer'])->group(function () {
     // Client Event Hub Dashboard
     Route::get('/dashboard', [ClientDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/client/dashboard', [ClientDashboardController::class, 'index'])->name('client.dashboard');
 
     // Booking Creation & Lifecycle
     Route::get('/book', [BookingController::class, 'create'])->name('booking.create');
@@ -59,8 +61,10 @@ Route::middleware(['auth', 'buyer'])->group(function () {
     Route::get('/my-bookings/{id}', [BookingController::class, 'show'])->name('client.bookings.show');
     Route::get('/my-bookings/{id}/pdf', [BookingController::class, 'pdf'])->name('client.bookings.pdf');
 
-    // Supplier Rating Submission
+    // Supplier Rating Submission & Platform Feedback
     Route::post('/ratings', [RatingController::class, 'store'])->name('ratings.store');
+    Route::post('/platform-feedback', [RatingController::class, 'storePlatformFeedback'])->name('platform.feedback.store');
+    Route::post('/platform-feedback/submit', [RatingController::class, 'storePlatformFeedback'])->name('platform-feedback.store');
 });
 
 /*
@@ -71,6 +75,9 @@ Route::middleware(['auth', 'buyer'])->group(function () {
 Route::middleware(['auth', 'supplier'])->prefix('supplier')->name('supplier.')->group(function () {
     // Supplier Command Center Dashboard
     Route::get('/dashboard', [SupplierDashboardController::class, 'index'])->name('dashboard');
+
+    // Supplier Review Reply
+    Route::post('/ratings/{id}/reply', [RatingController::class, 'reply'])->name('ratings.reply');
 
     // Business Profile & Services Configuration
     Route::get('/profile', [SupplierProfileController::class, 'edit'])->name('profile.edit');
@@ -117,7 +124,24 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     // Event Types & Services Catalog
     Route::get('/event-types', [AdminOperationsController::class, 'eventTypes'])->name('event-types.index');
     Route::post('/event-types', [AdminOperationsController::class, 'storeEventType'])->name('event-types.store');
+    Route::put('/event-types/{id}', [AdminOperationsController::class, 'updateEventType'])->name('event-types.update');
+    Route::patch('/event-types/{id}/toggle', [AdminOperationsController::class, 'toggleEventType'])->name('event-types.toggle');
+    Route::delete('/event-types/{id}', [AdminOperationsController::class, 'destroyEventType'])->name('event-types.destroy');
+
     Route::post('/services', [AdminOperationsController::class, 'storeService'])->name('services.store');
+    Route::put('/services/{id}', [AdminOperationsController::class, 'updateService'])->name('services.update');
+    Route::delete('/services/{id}', [AdminOperationsController::class, 'destroyService'])->name('services.destroy');
+    Route::post('/services/{id}/quick-assign', [AdminOperationsController::class, 'quickAssignSupplier'])->name('services.quick-assign');
+    Route::delete('/services/{id}/suppliers/{supplierId}', [AdminOperationsController::class, 'quickRemoveSupplier'])->name('services.quick-remove-supplier');
+
+    // Executed Celebrations & Portfolio Case Studies
+    Route::get('/portfolio', [AdminPortfolioController::class, 'index'])->name('portfolio.index');
+    Route::get('/portfolio/booking-data/{bookingId}', [AdminPortfolioController::class, 'bookingData'])->name('portfolio.booking-data');
+    Route::post('/portfolio', [AdminPortfolioController::class, 'store'])->name('portfolio.store');
+    Route::put('/portfolio/{id}', [AdminPortfolioController::class, 'update'])->name('portfolio.update');
+    Route::patch('/portfolio/{id}/toggle', [AdminPortfolioController::class, 'toggle'])->name('portfolio.toggle');
+    Route::patch('/portfolio/{id}/toggle-featured', [AdminPortfolioController::class, 'toggleFeatured'])->name('portfolio.toggle-featured');
+    Route::delete('/portfolio/{id}', [AdminPortfolioController::class, 'destroy'])->name('portfolio.destroy');
 
     // Budgets Audit
     Route::get('/budgets', [AdminOperationsController::class, 'budgets'])->name('budgets.index');

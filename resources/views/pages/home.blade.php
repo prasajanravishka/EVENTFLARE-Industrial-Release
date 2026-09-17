@@ -1381,227 +1381,113 @@
             <!-- Interactive Category Filter Navigation (Instant Filtering) -->
             <div class="category-filter-pills">
                 <button type="button" class="cat-pill active" data-filter="all">
-                    <i class="fas fa-sparkles"></i> All Categories (6)
+                    <i class="fas fa-sparkles"></i> All Categories ({{ $eventTypes->count() }})
                 </button>
-                <button type="button" class="cat-pill" data-filter="wedding">
-                    <i class="fas fa-ring" style="color: #ec4899;"></i> Royal Weddings
-                </button>
-                <button type="button" class="cat-pill" data-filter="dj">
-                    <i class="fas fa-compact-disc" style="color: #8b5cf6;"></i> DJ & Audio
-                </button>
-                <button type="button" class="cat-pill" data-filter="birthday">
-                    <i class="fas fa-birthday-cake" style="color: #f59e0b;"></i> Birthdays
-                </button>
-                <button type="button" class="cat-pill" data-filter="hotel">
-                    <i class="fas fa-hotel" style="color: #3b82f6;"></i> Luxury Venues
-                </button>
-                <button type="button" class="cat-pill" data-filter="gettogether">
-                    <i class="fas fa-users" style="color: #10b981;"></i> Social Mixers
-                </button>
-                <button type="button" class="cat-pill" data-filter="corporate">
-                    <i class="fas fa-briefcase" style="color: #6366f1;"></i> Bespoke & Corp
-                </button>
+                @foreach($eventTypes as $type)
+                    @php
+                        $slug = match(strtolower(trim($type->type_name))) {
+                            'weddings', 'wedding' => 'wedding',
+                            'dj parties', 'dj-parties', 'dj' => 'dj',
+                            'birthdays', 'birthday' => 'birthday',
+                            'hotel venues', 'hotel-venues', 'hotels', 'hotel' => 'hotel',
+                            'get togethers', 'get-together', 'reunions' => 'gettogether',
+                            'corporate', 'corporate & bespoke', 'bespoke & corporate galas' => 'corporate',
+                            default => Str::slug($type->type_name)
+                        };
+                        $icon = match($slug) {
+                            'wedding' => 'fas fa-ring',
+                            'dj' => 'fas fa-compact-disc',
+                            'birthday' => 'fas fa-birthday-cake',
+                            'hotel' => 'fas fa-hotel',
+                            'gettogether' => 'fas fa-users',
+                            'corporate' => 'fas fa-briefcase',
+                            default => 'fas fa-layer-group'
+                        };
+                        $color = $type->accent_color ?: match($slug) {
+                            'wedding' => '#ec4899',
+                            'dj' => '#8b5cf6',
+                            'birthday' => '#f59e0b',
+                            'hotel' => '#3b82f6',
+                            'gettogether' => '#10b981',
+                            'corporate' => '#6366f1',
+                            default => '#6366f1'
+                        };
+                    @endphp
+                    <button type="button" class="cat-pill" data-filter="{{ $slug }}">
+                        <i class="{{ $icon }}" style="color: {{ $color }};"></i> {{ $type->badge ?: $type->type_name }}
+                    </button>
+                @endforeach
             </div>
 
-            <!-- 6-Card Symmetrical Full-Width Showcase Grid -->
+            <!-- Dynamic Symmetrical Showcase Grid -->
             <div class="event-showcase-grid">
-                <!-- 1. Weddings & Poruwa -->
-                <div class="event-showcase-card" data-category="wedding">
-                    <div>
-                        <div class="event-card-img-wrap">
-                            <img src="{{ asset('assets/images/weding.jpg') }}" alt="Weddings & Poruwa Ceremonies" class="event-card-img" onerror="this.src='https://images.unsplash.com/photo-1519741497674-611481863552?w=700&auto=format&fit=crop&q=80'">
-                            <span class="event-rating-badge">
-                                <i class="fas fa-star" style="color: #f59e0b;"></i> 4.9 <span style="opacity: 0.75; font-weight: 500;">(420+)</span>
-                            </span>
-                            <span class="event-badge-tag" style="background: rgba(236, 72, 153, 0.92);">Royal Weddings</span>
+                @foreach($eventTypes as $type)
+                    @php
+                        $slug = match(strtolower(trim($type->type_name))) {
+                            'weddings', 'wedding' => 'wedding',
+                            'dj parties', 'dj-parties', 'dj' => 'dj',
+                            'birthdays', 'birthday' => 'birthday',
+                            'hotel venues', 'hotel-venues', 'hotels', 'hotel' => 'hotel',
+                            'get togethers', 'get-together', 'reunions' => 'gettogether',
+                            'corporate', 'corporate & bespoke', 'bespoke & corporate galas' => 'corporate',
+                            default => Str::slug($type->type_name)
+                        };
+                        $color = $type->accent_color ?: match($slug) {
+                            'wedding' => '#ec4899',
+                            'dj' => '#8b5cf6',
+                            'birthday' => '#f59e0b',
+                            'hotel' => '#3b82f6',
+                            'gettogether' => '#10b981',
+                            'corporate' => '#6366f1',
+                            default => '#6366f1'
+                        };
+                        $badge = $type->badge ?: $type->type_name;
+                        $chips = !empty($type->chips) ? array_map('trim', explode(',', $type->chips)) : [];
+                        $showcaseRoute = match($slug) {
+                            'wedding' => route('events.weddings'),
+                            'dj' => route('events.dj-parties'),
+                            'birthday' => route('events.birthdays'),
+                            'hotel' => route('events.hotels'),
+                            'gettogether' => route('events.get-together'),
+                            default => route('events.index')
+                        };
+                        $vendorText = $type->vendor_count_label ?: ($type->services_count > 0 ? ($type->services_count . '+ Accredited Services') : 'Accredited Services');
+                        $cardImg = $type->image_url ? asset($type->image_url) : asset('assets/images/weding.jpg');
+                    @endphp
+                    <div class="event-showcase-card" data-category="{{ $slug }}">
+                        <div>
+                            <div class="event-card-img-wrap">
+                                <img src="{{ $cardImg }}" alt="{{ $type->type_name }}" class="event-card-img" onerror="this.src='https://images.unsplash.com/photo-1519741497674-611481863552?w=700&auto=format&fit=crop&q=80'">
+                                <span class="event-rating-badge">
+                                    <i class="fas fa-star" style="color: #f59e0b;"></i> 4.9 <span style="opacity: 0.75; font-weight: 500;">(250+)</span>
+                                </span>
+                                <span class="event-badge-tag" style="background: {{ $color }}ee;">{{ $badge }}</span>
+                            </div>
+                            <h3 class="event-card-title">{{ $type->type_name }}</h3>
+                            <p class="event-card-desc">
+                                {{ $type->description }}
+                            </p>
+                            @if(!empty($chips))
+                                <div class="event-card-chips">
+                                    @foreach(array_slice($chips, 0, 3) as $chip)
+                                        <span class="event-chip"><i class="fas fa-sparkles" style="color: {{ $color }};"></i> {{ $chip }}</span>
+                                    @endforeach
+                                </div>
+                            @endif
+                            <div class="event-card-meta-bar">
+                                <span class="meta-vendors"><i class="fas fa-user-check"></i> {{ $vendorText }}</span>
+                            </div>
                         </div>
-                        <h3 class="event-card-title">Weddings & Poruwa Ceremonies</h3>
-                        <p class="event-card-desc">
-                            Traditional Poruwa masters, Ashtaka chanters, Ves dancers, bridal floral decors, gourmet banquet catering, and cinematic 4K drone videography.
-                        </p>
-                        <div class="event-card-chips">
-                            <span class="event-chip"><i class="fas fa-gem" style="color: #ec4899;"></i> Poruwa Rituals</span>
-                            <span class="event-chip"><i class="fas fa-video" style="color: #8b5cf6;"></i> 4K Cinema Drone</span>
-                            <span class="event-chip"><i class="fas fa-drum" style="color: #f59e0b;"></i> Ves Dancers</span>
-                        </div>
-                        <div class="event-card-meta-bar">
-                            <span class="meta-vendors"><i class="fas fa-user-check"></i> 120+ Curated Vendors</span>
-                        </div>
-                    </div>
-                    <div class="event-card-actions">
-                        <a href="{{ route('events.weddings') }}" class="event-btn-outline">
-                            <i class="fas fa-eye"></i> View Showcase
-                        </a>
-                        <a href="{{ route('booking.create', ['event' => 'Wedding']) }}" class="event-btn-primary">
-                            <i class="fas fa-calendar-check"></i> Book Event
-                        </a>
-                    </div>
-                </div>
-
-                <!-- 2. DJ Parties & Concert Audio -->
-                <div class="event-showcase-card" data-category="dj">
-                    <div>
-                        <div class="event-card-img-wrap">
-                            <img src="{{ asset('assets/images/dj.jpg') }}" alt="DJ Parties & Concert Audio" class="event-card-img" onerror="this.src='https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=700&auto=format&fit=crop&q=80'">
-                            <span class="event-rating-badge">
-                                <i class="fas fa-star" style="color: #f59e0b;"></i> 4.9 <span style="opacity: 0.75; font-weight: 500;">(280+)</span>
-                            </span>
-                            <span class="event-badge-tag" style="background: rgba(139, 92, 246, 0.92);">Club Beats</span>
-                        </div>
-                        <h3 class="event-card-title">DJ Parties & Concert Audio</h3>
-                        <p class="event-card-desc">
-                            JBL line-array sound systems, intelligent moving heads, strobe lights, headline EDM/commercial DJs, crowd control, and mobile mixology cocktail bars.
-                        </p>
-                        <div class="event-card-chips">
-                            <span class="event-chip"><i class="fas fa-volume-up" style="color: #8b5cf6;"></i> JBL Line Array</span>
-                            <span class="event-chip"><i class="fas fa-lightbulb" style="color: #ec4899;"></i> Moving Heads</span>
-                            <span class="event-chip"><i class="fas fa-cocktail" style="color: #10b981;"></i> Mobile Bar</span>
-                        </div>
-                        <div class="event-card-meta-bar">
-                            <span class="meta-vendors"><i class="fas fa-user-check"></i> 45+ Sound Crews</span>
-                        </div>
-                    </div>
-                    <div class="event-card-actions">
-                        <a href="{{ route('events.dj-parties') }}" class="event-btn-outline">
-                            <i class="fas fa-eye"></i> View Showcase
-                        </a>
-                        <a href="{{ route('booking.create', ['event' => 'DJ Party']) }}" class="event-btn-primary">
-                            <i class="fas fa-calendar-check"></i> Book Event
-                        </a>
-                    </div>
-                </div>
-
-                <!-- 3. Birthdays & Anniversaries -->
-                <div class="event-showcase-card" data-category="birthday">
-                    <div>
-                        <div class="event-card-img-wrap">
-                            <img src="{{ asset('assets/images/cake.jpg') }}" alt="Birthdays & Anniversaries" class="event-card-img" onerror="this.src='https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=700&auto=format&fit=crop&q=80'">
-                            <span class="event-rating-badge">
-                                <i class="fas fa-star" style="color: #f59e0b;"></i> 4.8 <span style="opacity: 0.75; font-weight: 500;">(310+)</span>
-                            </span>
-                            <span class="event-badge-tag" style="background: rgba(245, 158, 11, 0.92);">Milestones</span>
-                        </div>
-                        <h3 class="event-card-title">Birthdays & Anniversaries</h3>
-                        <p class="event-card-desc">
-                            Artisan sculpted fondant cakes, pastel balloon garlands, kids entertainers, cartoon mascot appearances, sweet dessert tables, and themed catering.
-                        </p>
-                        <div class="event-card-chips">
-                            <span class="event-chip"><i class="fas fa-birthday-cake" style="color: #f59e0b;"></i> Fondant Cakes</span>
-                            <span class="event-chip"><i class="fas fa-hat-wizard" style="color: #8b5cf6;"></i> Kids Entertainers</span>
-                            <span class="event-chip"><i class="fas fa-icons" style="color: #ec4899;"></i> Balloon Arches</span>
-                        </div>
-                        <div class="event-card-meta-bar">
-                            <span class="meta-vendors"><i class="fas fa-user-check"></i> 60+ Entertainers</span>
+                        <div class="event-card-actions">
+                            <a href="{{ $showcaseRoute }}" class="event-btn-outline">
+                                <i class="fas fa-eye"></i> View Showcase
+                            </a>
+                            <a href="{{ route('booking.create', ['event' => $type->type_name]) }}" class="event-btn-primary">
+                                <i class="fas fa-calendar-check"></i> Book Event
+                            </a>
                         </div>
                     </div>
-                    <div class="event-card-actions">
-                        <a href="{{ route('events.birthdays') }}" class="event-btn-outline">
-                            <i class="fas fa-eye"></i> View Showcase
-                        </a>
-                        <a href="{{ route('booking.create', ['event' => 'Birthday']) }}" class="event-btn-primary">
-                            <i class="fas fa-calendar-check"></i> Book Event
-                        </a>
-                    </div>
-                </div>
-
-                <!-- 4. Hotel Venues & Halls -->
-                <div class="event-showcase-card" data-category="hotel">
-                    <div>
-                        <div class="event-card-img-wrap">
-                            <img src="{{ asset('assets/images/hotel.jpg') }}" alt="5-Star Hotel Venues & Halls" class="event-card-img" onerror="this.src='https://images.unsplash.com/photo-1566073771259-6a8506099945?w=700&auto=format&fit=crop&q=80'">
-                            <span class="event-rating-badge">
-                                <i class="fas fa-star" style="color: #f59e0b;"></i> 5.0 <span style="opacity: 0.75; font-weight: 500;">(190+)</span>
-                            </span>
-                            <span class="event-badge-tag" style="background: rgba(59, 130, 246, 0.92);">Luxury Venues</span>
-                        </div>
-                        <h3 class="event-card-title">5-Star Hotel Venues & Halls</h3>
-                        <p class="event-card-desc">
-                            Grand crystal ballrooms, beachfront lawns, international buffet menus, luxury guest room blocks, bridal changing suites, and ample secure valet parking.
-                        </p>
-                        <div class="event-card-chips">
-                            <span class="event-chip"><i class="fas fa-water" style="color: #3b82f6;"></i> Oceanfront Lawns</span>
-                            <span class="event-chip"><i class="fas fa-utensils" style="color: #f59e0b;"></i> 5-Star Buffets</span>
-                            <span class="event-chip"><i class="fas fa-parking" style="color: #10b981;"></i> Valet Parking</span>
-                        </div>
-                        <div class="event-card-meta-bar">
-                            <span class="meta-vendors"><i class="fas fa-user-check"></i> 25+ 5-Star Venues</span>
-                        </div>
-                    </div>
-                    <div class="event-card-actions">
-                        <a href="{{ route('events.hotels') }}" class="event-btn-outline">
-                            <i class="fas fa-eye"></i> View Showcase
-                        </a>
-                        <a href="{{ route('booking.create', ['event' => 'Hotel Venue']) }}" class="event-btn-primary">
-                            <i class="fas fa-calendar-check"></i> Book Event
-                        </a>
-                    </div>
-                </div>
-
-                <!-- 5. Social Reunions & Get-Togethers -->
-                <div class="event-showcase-card" data-category="gettogether">
-                    <div>
-                        <div class="event-card-img-wrap">
-                            <img src="{{ asset('assets/images/evnt.jpg') }}" alt="Social Reunions & Get-Togethers" class="event-card-img" onerror="this.src='https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=700&auto=format&fit=crop&q=80'">
-                            <span class="event-rating-badge">
-                                <i class="fas fa-star" style="color: #f59e0b;"></i> 4.9 <span style="opacity: 0.75; font-weight: 500;">(160+)</span>
-                            </span>
-                            <span class="event-badge-tag" style="background: rgba(16, 185, 129, 0.92);">Social Mixers</span>
-                        </div>
-                        <h3 class="event-card-title">Social Reunions & Get-Togethers</h3>
-                        <p class="event-card-desc">
-                            Casual garden parties, alumni reunions, live charcoal BBQ skewer setups, acoustic guitar sets, canopy marquee rentals, and lawn game packages.
-                        </p>
-                        <div class="event-card-chips">
-                            <span class="event-chip"><i class="fas fa-fire" style="color: #ef4444;"></i> Live Charcoal BBQ</span>
-                            <span class="event-chip"><i class="fas fa-guitar" style="color: #8b5cf6;"></i> Acoustic Trio</span>
-                            <span class="event-chip"><i class="fas fa-campground" style="color: #10b981;"></i> Marquee Pergolas</span>
-                        </div>
-                        <div class="event-card-meta-bar">
-                            <span class="meta-vendors"><i class="fas fa-user-check"></i> 35+ Rental Partners</span>
-                        </div>
-                    </div>
-                    <div class="event-card-actions">
-                        <a href="{{ route('events.get-together') }}" class="event-btn-outline">
-                            <i class="fas fa-eye"></i> View Showcase
-                        </a>
-                        <a href="{{ route('booking.create', ['event' => 'Get Together']) }}" class="event-btn-primary">
-                            <i class="fas fa-calendar-check"></i> Book Event
-                        </a>
-                    </div>
-                </div>
-
-                <!-- 6. Bespoke & Corporate Galas (Creates Perfect 3x2 Grid Balance) -->
-                <div class="event-showcase-card" data-category="corporate">
-                    <div>
-                        <div class="event-card-img-wrap">
-                            <img src="https://images.unsplash.com/photo-1511578314322-379afb476865?w=700&auto=format&fit=crop&q=80" alt="Corporate & Bespoke Galas" class="event-card-img">
-                            <span class="event-rating-badge">
-                                <i class="fas fa-star" style="color: #f59e0b;"></i> 4.9 <span style="opacity: 0.75; font-weight: 500;">(95+)</span>
-                            </span>
-                            <span class="event-badge-tag" style="background: rgba(99, 102, 241, 0.92);">Bespoke & Corp</span>
-                        </div>
-                        <h3 class="event-card-title">Corporate & Bespoke Galas</h3>
-                        <p class="event-card-desc">
-                            Annual awards ceremonies, corporate brand activations, executive banquets, product launches, and customized multi-day itineraries with dedicated manager.
-                        </p>
-                        <div class="event-card-chips">
-                            <span class="event-chip"><i class="fas fa-trophy" style="color: #f59e0b;"></i> Awards Galas</span>
-                            <span class="event-chip"><i class="fas fa-microphone-alt" style="color: #3b82f6;"></i> Keynote Staging</span>
-                            <span class="event-chip"><i class="fas fa-user-shield" style="color: #6366f1;"></i> Event Concierge</span>
-                        </div>
-                        <div class="event-card-meta-bar">
-                            <span class="meta-vendors"><i class="fas fa-bolt" style="color: #f59e0b;"></i> 24h Concierge Turnaround</span>
-                        </div>
-                    </div>
-                    <div class="event-card-actions">
-                        <a href="{{ route('events.index') }}" class="event-btn-outline">
-                            <i class="fas fa-th-large"></i> All Services
-                        </a>
-                        <a href="{{ route('booking.create') }}" class="event-btn-primary">
-                            <i class="fas fa-calendar-plus"></i> Custom Booking
-                        </a>
-                    </div>
-                </div>
+                @endforeach
             </div>
 
             <!-- Executed Celebrations & Case Studies Showcase (Horizontal Carousel UX) -->
